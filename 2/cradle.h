@@ -2,6 +2,9 @@
 #define _CRADLE_H
 #define UPCASE(C) ((1<<6)| (C))
 
+#define MAX_BUF 100
+char tmp[MAX_BUF];
+
 char Look;
 
 void GetChar();

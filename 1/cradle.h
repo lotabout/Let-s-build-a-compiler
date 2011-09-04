@@ -1,6 +1,10 @@
 #ifndef _CRADLE_H
 #define _CRADLE_H
+
 #define UPCASE(C) ((1<<6)| (C))
+#define MAX_BUF 100
+
+static char tmp[MAX_BUF];
 
 char Look;
 

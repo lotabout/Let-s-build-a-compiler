@@ -2,9 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_BUF 100
-
-static char tmp[MAX_BUF];
 
 void GetChar() 
 {
