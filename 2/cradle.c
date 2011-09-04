@@ -49,6 +49,10 @@ int IsDigit(char c)
     return (c >= '0') && (c <= '9');
 }
 
+int IsAddop(char c)
+{
+    return (c == '+') || (c == '-');
+}
 
 char GetName()
 {

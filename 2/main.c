@@ -66,7 +66,11 @@ void Term()
 
 void Expression()
 {
-    Term();
+    if(IsAddop(Look))
+        EmitLn("xor %eax %eax");
+    else
+        Term();
+
     while (strchr("+-", Look)) {
 
         EmitLn("pushl %eax");
