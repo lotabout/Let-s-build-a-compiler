@@ -15,7 +15,7 @@ void Multiply()
 {
     Match('*');
     Factor();
-    EmitLn("mull (%esp) %eax");
+    EmitLn("imull (%esp), %eax");
     EmitLn("addl $4, %esp");
 }
 
@@ -67,7 +67,7 @@ void Term()
 void Expression()
 {
     if(IsAddop(Look))
-        EmitLn("xor %eax %eax");
+        EmitLn("xor %eax, %eax");
     else
         Term();
 
@@ -94,7 +94,7 @@ void Add()
 {
     Match('+');
     Term();
-    EmitLn("addl (%esp) %eax");
+    EmitLn("addl (%esp), %eax");
     EmitLn("addl $4, %esp");
     
 }
@@ -104,7 +104,7 @@ void Substract()
 {
     Match('-');
     Term();
-    EmitLn("subl (%esp) %eax");
+    EmitLn("subl (%esp), %eax");
     EmitLn("negl %eax");
     EmitLn("addl $4, %esp");
 }
