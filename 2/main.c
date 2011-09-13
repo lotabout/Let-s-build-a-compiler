@@ -17,7 +17,7 @@ void Multiply()
     Factor();
     EmitLn("imull (%esp), %eax");
     EmitLn("addl $4, %esp");
-}
+} 
 
 void Divide()
 {
@@ -35,6 +35,12 @@ void Factor()
         Match('(');
         Expression();
         Match(')');
+     } else if(IsAddop(Look)) {
+
+        Match('-');
+        sprintf(tmp,"movl $%c, %%eax", GetNum());
+        EmitLn(tmp);
+        EmitLn("negl %eax");
 
     } else {
 
