@@ -16,6 +16,7 @@ void Multiply()
     Match('*');
     Factor();
     EmitLn("imull (%esp), %eax");
+    /* push of the stack */
     EmitLn("addl $4, %esp");
 } 
 
@@ -23,12 +24,18 @@ void Divide()
 {
     Match('/');
     Factor();
+
+    /* for a expersion like a/b we have eax=b and %(esp)=a
+     * but we need eax=a, and b on the stack 
+     */
     EmitLn("movl (%esp), %edx");
     EmitLn("addl $4, %esp");
 
     EmitLn("pushl %eax");
 
     EmitLn("movl %edx, %eax");
+
+    /* sign extesnion */
     EmitLn("sarl $31, %edx");
     EmitLn("idivl (%esp)");
     EmitLn("addl $4, %esp");
