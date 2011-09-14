@@ -23,8 +23,16 @@ void Divide()
 {
     Match('/');
     Factor();
-    EmitLn("div (%esp) %eax");
+    EmitLn("movl (%esp), %edx");
     EmitLn("addl $4, %esp");
+
+    EmitLn("pushl %eax");
+
+    EmitLn("movl %edx, %eax");
+    EmitLn("sarl $31, %edx");
+    EmitLn("idivl (%esp)");
+    EmitLn("addl $4, %esp");
+
 }
 
 void Factor()
