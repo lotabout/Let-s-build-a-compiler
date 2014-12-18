@@ -7,3 +7,7 @@ all:
 
 run:
 	./$(OUT)
+
+.PHONY: clean
+clean:
+	rm $(OUT)

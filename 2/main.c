@@ -133,7 +133,16 @@ void Substract()
 
 int main()
 {
+
     Init();
+    EmitLn(".text");
+    EmitLn(".global _start");
+    EmitLn("_start:");
     Expression();
+
+    /* return the result */
+    EmitLn("movl %eax, %ebx");
+    EmitLn("movl $1, %eax");
+    EmitLn("int $0x80");
     return 0;
 }
