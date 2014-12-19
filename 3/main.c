@@ -151,6 +151,10 @@ int main()
     EmitLn(".global _start");
     EmitLn("_start:");
     Expression();
+    if (Look != '\n') {
+        Expected("NewLine");
+    }
+
 
     /* return the result */
     EmitLn("movl %eax, %ebx");
