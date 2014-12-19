@@ -9,6 +9,7 @@ void Expression();
 void Add();
 void Substract();
 void Factor();
+void Ident();
 
 
 void Multiply()
@@ -42,6 +43,20 @@ void Divide()
 
 }
 
+void Ident()
+{
+    char name = GetName();
+    if (Look == '(') {
+        Match('(');
+        Match(')');
+        sprintf(tmp, "call %c", name);
+        EmitLn(tmp);
+    } else {
+        sprintf(tmp, "movl %c, %%eax", name);
+        EmitLn(tmp);
+    }
+}
+
 void Factor()
 {
     if(Look == '(') {
@@ -54,8 +69,7 @@ void Factor()
         EmitLn(tmp);
         EmitLn("negl %eax");
     } else if (IsAlpha(Look)) {
-        sprintf(tmp, "movl %c, %%eax", GetName());
-        EmitLn(tmp);
+        Ident();
     } else {
         sprintf(tmp,"movl $%c, %%eax", GetNum());
         EmitLn(tmp);
