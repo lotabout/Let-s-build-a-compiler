@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 void GetChar() 
 {
     Look = getchar();
@@ -32,6 +31,7 @@ void Match(char x)
 {
     if(Look == x) {
         GetChar();
+        SkipWhite();
     } else {
         sprintf(tmp, "' %c ' ",  x);
         Expected(tmp);
@@ -41,7 +41,7 @@ void Match(char x)
 
 int IsAlpha(char c)
 {
-    return (UPCASE(c) >= 'A') && (UPCASE(c) <= 'Z');
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 } 
 
 int IsDigit(char c)
@@ -49,38 +49,67 @@ int IsDigit(char c)
     return (c >= '0') && (c <= '9');
 }
 
+int IsAlNum(char c)
+{
+    return IsAlpha(c) || IsDigit(c);
+}
+
 int IsAddop(char c)
 {
     return (c == '+') || (c == '-');
 }
 
-char GetName()
+int IsWhite(char c)
 {
-    char c = Look;
+    return (c == ' ') || (c == '\t');
+}
 
-    if( !IsAlpha(Look)) {
-        sprintf(tmp, "Name");
-        Expected(tmp);
+char* GetName()
+{
+    char *token = token_buf;
+
+    if( !IsAlNum(Look)) {
+        Expected("Name");
+    }
+    while (IsAlNum(Look)) {
+        *token = Look;
+        token++;
+
+        GetChar();
     }
 
-    GetChar();
+    SkipWhite();
 
-    return UPCASE(c);
+    *token = '\0';
+    return token_buf;
 }
 
 
-char GetNum()
+char* GetNum()
 {
-    char c = Look;
+    char *value = token_buf;
 
-    if( !IsDigit(Look)) {
-        sprintf(tmp, "Integer");
-        Expected(tmp);
+    if( !IsAlNum(Look)) {
+        Expected("Integer");
+    }
+    while (IsDigit(Look)) {
+        *value = Look;
+        value++;
+
+        GetChar();
     }
 
-    GetChar();
+    SkipWhite();
 
-    return c;
+    *value = '\0';
+    return token_buf;
+}
+
+void SkipWhite()
+{
+    while (IsWhite(Look)) {
+        GetChar();
+    }
 }
 
 void Emit(char *s)
@@ -97,5 +126,6 @@ void EmitLn(char *s)
 void Init()
 {
     GetChar();
+    SkipWhite();
 }
 

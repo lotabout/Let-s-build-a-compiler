@@ -46,14 +46,14 @@ void Divide()
 
 void Ident()
 {
-    char name = GetName();
+    char *name = GetName();
     if (Look == '(') {
         Match('(');
         Match(')');
-        sprintf(tmp, "call %c", name);
+        sprintf(tmp, "call %s", name);
         EmitLn(tmp);
     } else {
-        sprintf(tmp, "movl %c, %%eax", name);
+        sprintf(tmp, "movl %s, %%eax", name);
         EmitLn(tmp);
     }
 }
@@ -66,13 +66,13 @@ void Factor()
         Match(')');
      } else if(IsAddop(Look)) {
         Match('-');
-        sprintf(tmp,"movl $%c, %%eax", GetNum());
+        sprintf(tmp,"movl $%s, %%eax", GetNum());
         EmitLn(tmp);
         EmitLn("negl %eax");
     } else if (IsAlpha(Look)) {
         Ident();
     } else {
-        sprintf(tmp,"movl $%c, %%eax", GetNum());
+        sprintf(tmp,"movl $%s, %%eax", GetNum());
         EmitLn(tmp);
     }
 }
@@ -145,10 +145,10 @@ void Substract()
 
 void Assignment()
 {
-    char name = GetName();
+    char *name = GetName();
     Match('=');
     Expression();
-    sprintf(tmp, "lea %c, %%ebx", name);
+    sprintf(tmp, "lea %s, %%ebx", name);
     EmitLn(tmp);
     EmitLn("movl %eax, (%ebx)");
 }

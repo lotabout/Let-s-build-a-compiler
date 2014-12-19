@@ -1,9 +1,9 @@
 #ifndef _CRADLE_H
 #define _CRADLE_H
-#define UPCASE(C) ((1<<6)| (C))
 
 #define MAX_BUF 100
 char tmp[MAX_BUF];
+char token_buf[MAX_BUF];
 
 char Look;
 
@@ -17,9 +17,13 @@ void Match(char x);
 int IsAlpha(char c);
 int IsDigit(char c);
 int IsAddop(char c);
+int IsAlNum(char c);
+int IsWhite(char c);
 
-char GetName();
-char GetNum();
+char *GetName();
+char *GetNum();
+
+void SkipWhite();
 
 void Emit(char *s);
 void EmitLn(char *s);
