@@ -10,6 +10,7 @@ void Add();
 void Substract();
 void Factor();
 void Ident();
+void Assignment();
 
 
 void Multiply()
@@ -142,6 +143,15 @@ void Substract()
     EmitLn("addl $4, %esp");
 }
 
+void Assignment()
+{
+    char name = GetName();
+    Match('=');
+    Expression();
+    sprintf(tmp, "lea %c, %%ebx", name);
+    EmitLn(tmp);
+    EmitLn("movl %eax, (%ebx)");
+}
 
 int main()
 {
@@ -150,7 +160,8 @@ int main()
     EmitLn(".text");
     EmitLn(".global _start");
     EmitLn("_start:");
-    Expression();
+    /* Expression(); */
+    Assignment();
     if (Look != '\n') {
         Expected("NewLine");
     }
