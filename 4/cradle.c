@@ -71,16 +71,18 @@ char GetName()
 
 int GetNum()
 {
+    int value = 0;
     if( !IsDigit(Look)) {
         sprintf(tmp, "Integer");
         Expected(tmp);
     }
 
-    int num = Look - '0';
+    while (IsDigit(Look)) {
+        value = value * 10 + Look - '0';
+        GetChar();
+    }
 
-    GetChar();
-
-    return num;
+    return value;
 }
 
 void Emit(char *s)

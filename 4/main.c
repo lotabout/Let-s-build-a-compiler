@@ -4,11 +4,11 @@
 
 #include "cradle.h"
 
-void Term();
+int Term();
 int Expression();
 void Add();
 void Substract();
-void Factor();
+int Factor();
 void Ident();
 void Assignment();
 
@@ -58,70 +58,82 @@ void Ident()
     }
 }
 
-void Factor()
+int Factor()
 {
-    if(Look == '(') {
+    /* if(Look == '(') { */
+    /*     Match('('); */
+    /*     Expression(); */
+    /*     Match(')'); */
+    /*  } else if(IsAddop(Look)) { */
+    /*     Match('-'); */
+    /*     sprintf(tmp,"movl $%c, %%eax", GetNum()); */
+    /*     EmitLn(tmp); */
+    /*     EmitLn("negl %eax"); */
+    /* } else if (IsAlpha(Look)) { */
+    /*     Ident(); */
+    /* } else { */
+    /*     sprintf(tmp,"movl $%c, %%eax", GetNum()); */
+    /*     EmitLn(tmp); */
+    /* } */
+    int factor;
+    if (Look == '(') {
         Match('(');
-        Expression();
+        factor = Expression();
         Match(')');
-     } else if(IsAddop(Look)) {
-        Match('-');
-        sprintf(tmp,"movl $%c, %%eax", GetNum());
-        EmitLn(tmp);
-        EmitLn("negl %eax");
-    } else if (IsAlpha(Look)) {
-        Ident();
     } else {
-        sprintf(tmp,"movl $%c, %%eax", GetNum());
-        EmitLn(tmp);
+        factor = GetNum();
     }
+
+    return factor;
 }
 
-void Term()
+int Term()
 {
-    Factor();
+    int value = Factor();
     while (strchr("*/", Look)) {
-
-        EmitLn("pushl %eax");
-
         switch(Look)
         {
             case '*':
-                Multiply();
+                Match('*');
+                value *= Factor();
                 break;
             case '/':
-                Divide();
+                Match('/');
+                value /= Factor();
                 break;
             default:
                 Expected("Mulop");
         }
     }
+
+    return value;
 }
 
 int Expression()
 {
-    return GetNum();
-    /* if(IsAddop(Look)) */
-    /*     EmitLn("xor %eax, %eax"); */
-    /* else */
-    /*     Term(); */
+    int value;
+    if(IsAddop(Look))
+        value = 0;
+    else
+        value = Term();
 
-    /* while (strchr("+-", Look)) { */
+    while (IsAddop(Look)) {
+        switch(Look)
+        {
+            case '+':
+                Match('+');
+                value += Term();
+                break;
+            case '-':
+                Match('-');
+                value -= Term();
+                break;
+            default:
+                Expected("Addop");
+        }
+    }
 
-    /*     EmitLn("pushl %eax"); */
-
-    /*     switch(Look) */
-    /*     { */
-    /*         case '+': */
-    /*             Add(); */
-    /*             break; */
-    /*         case '-': */
-    /*             Substract(); */
-    /*             break; */
-    /*         default: */
-    /*             Expected("Addop"); */
-    /*     } */
-    /* } */
+    return value;
 }
 
 
