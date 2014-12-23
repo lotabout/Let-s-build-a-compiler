@@ -2,10 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* Helper Functions */
+char uppercase(char c)
+{
+    return (c | 0x20);
+}
 
 void GetChar() 
 {
     Look = getchar();
+    /* printf("Getchar: %c\n", Look); */
 }
 
 
@@ -38,6 +44,17 @@ void Match(char x)
     }
 }
 
+void Newline()
+{
+    if (Look == '\r') {
+        GetChar();
+        if (Look == '\n') {
+            GetChar();
+        }
+    } else if (Look == '\n') {
+        GetChar();
+    }
+}
 
 int IsAlpha(char c)
 {
@@ -65,7 +82,7 @@ char GetName()
 
     GetChar();
 
-    return c;
+    return uppercase(c);
 }
 
 
@@ -98,6 +115,15 @@ void EmitLn(char *s)
 
 void Init()
 {
+    InitTable();
     GetChar();
 }
 
+void InitTable()
+{
+    int i;
+    for (i = 0; i < TABLE_SIZE; i++) {
+        Table[i] = 0;
+    }
+
+}

@@ -13,6 +13,7 @@ void Ident();
 void Assignment();
 
 
+/* Not used in Chapter 4 */
 void Multiply()
 {
     Match('*');
@@ -22,6 +23,7 @@ void Multiply()
     EmitLn("addl $4, %esp");
 } 
 
+/* Not used in Chapter 4 */
 void Divide()
 {
     Match('/');
@@ -60,26 +62,13 @@ void Ident()
 
 int Factor()
 {
-    /* if(Look == '(') { */
-    /*     Match('('); */
-    /*     Expression(); */
-    /*     Match(')'); */
-    /*  } else if(IsAddop(Look)) { */
-    /*     Match('-'); */
-    /*     sprintf(tmp,"movl $%c, %%eax", GetNum()); */
-    /*     EmitLn(tmp); */
-    /*     EmitLn("negl %eax"); */
-    /* } else if (IsAlpha(Look)) { */
-    /*     Ident(); */
-    /* } else { */
-    /*     sprintf(tmp,"movl $%c, %%eax", GetNum()); */
-    /*     EmitLn(tmp); */
-    /* } */
     int factor;
     if (Look == '(') {
         Match('(');
         factor = Expression();
         Match(')');
+    } else if (IsAlpha(Look)) {
+        factor = Table[GetName() - 'A'];
     } else {
         factor = GetNum();
     }
@@ -137,6 +126,7 @@ int Expression()
 }
 
 
+/* Not used in Chapter 4 */
 void Add()
 {
     Match('+');
@@ -147,6 +137,7 @@ void Add()
 }
 
 
+/* Not used in Chapter 4 */
 void Substract()
 {
     Match('-');
@@ -160,23 +151,45 @@ void Assignment()
 {
     char name = GetName();
     Match('=');
-    Expression();
-    sprintf(tmp, "lea %c, %%ebx", name);
+    Table[name - 'A'] = Expression();
+}
+
+/* Input Routine
+ * We do a little different to the original article.  The syntax of
+ * input is "?<variable name><expression>" */
+void Input()
+{
+    Match('?');
+    char name = GetName();
+    Table[name - 'A'] = Expression();
+}
+
+/* Output Routine */
+void Output()
+{
+    Match('!');
+    sprintf(tmp, "%d", Table[GetName() - 'A']);
     EmitLn(tmp);
-    EmitLn("movl %eax, (%ebx)");
 }
 
 int main()
 {
 
     Init();
-    /* Expression(); */
-    /* Assignment(); */
-    
-    printf("%d\n", Expression());
-    if (Look != '\n') {
-        Expected("NewLine");
-    }
+    do
+    {
+        switch(Look) {
+        case '?':
+            Input();
+            break;
+        case '!':
+            Output();
+            break;
+        default:
+            Assignment();
+        }
 
+        Newline();
+    } while (Look != '.');
     return 0;
 }
