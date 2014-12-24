@@ -2,6 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define TABLE_SIZE 26
+static int LCount = 0;
+static char labelName[MAX_BUF];
+
+static int Table[TABLE_SIZE];
+
 /* Helper Functions */
 char uppercase(char c)
 {
@@ -115,6 +121,8 @@ void EmitLn(char *s)
 
 void Init()
 {
+    LCount = 0;
+
     InitTable();
     GetChar();
 }
@@ -126,4 +134,16 @@ void InitTable()
         Table[i] = 0;
     }
 
+}
+
+char *NewLabel()
+{
+    sprintf(labelName, "L%02d", LCount);
+    LCount ++;
+    return labelName;
+}
+
+void PostLabel(char *label)
+{
+    printf("%s:\n", label);
 }

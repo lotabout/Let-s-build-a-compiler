@@ -2,11 +2,8 @@
 #define _CRADLE_H
 
 #define MAX_BUF 100
-#define TABLE_SIZE 26
-char tmp[MAX_BUF];
-
+static char tmp[MAX_BUF];
 char Look;
-int Table[TABLE_SIZE];
 
 void GetChar();
 
@@ -30,4 +27,6 @@ void EmitLn(char *s);
 void Init();
 void InitTable();
 
+char *NewLabel();
+void PostLabel(char *label);
 #endif

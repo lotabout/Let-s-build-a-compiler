@@ -6,7 +6,9 @@
 
 void Other();
 void Block();
+void Condition();
 void DoProgram();
+void DoIf();
 
 void Other()
 {
@@ -17,12 +19,26 @@ void Other()
 void Block()
 {
     while (Look != 'e') {
-        Other();
-
+        switch (Look) {
+            case 'i':
+                DoIf();
+                break;
+            case 'o':
+                Other();
+                break;
+            default:
+                Other();
+                break;
+        }
         /* this is for convinent, otherwise newline character will
         cause an error */
-        Newline(); 
+        Newline();
     }
+}
+
+void Condition()
+{
+    EmitLn("<codition>");
 }
 
 void DoProgram()
@@ -33,6 +49,19 @@ void DoProgram()
     }
     EmitLn("END");
 }
+
+void DoIf()
+{
+    Match('i');
+    Condition();
+    char *label = NewLabel();
+    sprintf(tmp, "jz %s", label);
+    EmitLn(tmp);
+    Block();
+    Match('e');
+    PostLabel(label);
+}
+
 
 int main()
 {
