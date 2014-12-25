@@ -55,3 +55,21 @@ should explicitly be:
 <program> ::= <block>
 <block> ::= [ <statement> ]* END
 ```
+
+Another way is to tell the block matcher to recognize the "ELSE" token as the
+author did in the next section.
+
+```
+procedure Block;
+begin
+   while not(Look in ['e', 'l']) do begin
+      case Look of
+       'i': DoIf;
+       'w': DoWhile;
+       else Other;
+      end;
+   end;
+end;
+```
+
+Also note the `else` branch instead of the original 'o' branch.

@@ -15,6 +15,7 @@ void Block();
 void Condition();
 void DoProgram();
 void DoIf();
+void DoWhile();
 
 void Other()
 {
@@ -24,11 +25,14 @@ void Other()
 
 void Block()
 {
-    while (Look != 'e') {
+    while (! strchr("el", Look)) {
         dprint("Block: get Look = %c\n", Look);
         switch (Look) {
             case 'i':
                 DoIf();
+                break;
+            case 'w':
+                DoWhile();
                 break;
             default:
                 Other();
@@ -38,7 +42,6 @@ void Block()
         cause an error */
         Newline();
     }
-    Match('e');
 }
 
 void Condition()
@@ -49,6 +52,9 @@ void Condition()
 void DoProgram()
 {
     Block();
+    if (Look != 'e') {
+        Expected("End");
+    }
     EmitLn("END");
 }
 
@@ -82,6 +88,25 @@ void DoIf()
     }
 
     Match('e');
+    PostLabel(L2);
+}
+
+void DoWhile()
+{
+    char L1[MAX_BUF];
+    char L2[MAX_BUF];
+
+    Match('w');
+    strcpy(L1, NewLabel());
+    strcpy(L2, NewLabel());
+    PostLabel(L1);
+    Condition();
+    sprintf(tmp, "jz %s", L2);
+    EmitLn(tmp);
+    Block();
+    Match('e');
+    sprintf(tmp, "jmp %s", L1);
+    EmitLn(tmp);
     PostLabel(L2);
 }
 
