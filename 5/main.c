@@ -20,6 +20,7 @@ void DoLoop();
 void DoRepeat();
 void DoFor();
 void Expression();
+void DoDo();
 
 void Other()
 {
@@ -46,6 +47,9 @@ void Block()
                 break;
             case 'f':
                 DoFor();
+                break;
+            case 'd':
+                DoDo();
                 break;
             default:
                 Other();
@@ -149,9 +153,7 @@ void DoRepeat()
     EmitLn(tmp);
 }
 
-/* Note that x86 have 'loop' instruction that will check %ecx every time till
- * it gets 0. It will suit the task better here. 
- * And I haven't test the actual generated x86 code here, so you're free to
+/* I haven't test the actual generated x86 code here, so you're free to
  * inform me if there are bugs. :) */
 void DoFor()
 {
@@ -190,6 +192,22 @@ void DoFor()
 void Expression()
 {
     EmitLn("<expression>");
+}
+
+void DoDo()
+{
+    Match('d');
+    char L[MAX_BUF];
+    strcpy(L, NewLabel());
+    Expression();
+    EmitLn("subl %eax, $1");
+    EmitLn("movl %eax, %ecx");
+    PostLabel(L);
+    EmitLn("pushl %ecx");
+    Block();
+    EmitLn("popl %ecx");
+    sprintf(tmp, "loop %s", L);
+    EmitLn(tmp);
 }
 
 int main()
