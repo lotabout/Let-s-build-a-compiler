@@ -11,16 +11,17 @@
 #endif
 
 void Other();
-void Block();
+void Block(char *L);
 void Condition();
 void DoProgram();
-void DoIf();
+void DoIf(char *L);
 void DoWhile();
 void DoLoop();
 void DoRepeat();
 void DoFor();
 void Expression();
 void DoDo();
+void DoBreak(char *L);
 
 void Other()
 {
@@ -28,13 +29,13 @@ void Other()
     EmitLn(tmp);
 }
 
-void Block()
+void Block(char *L)
 {
     while (! strchr("elu", Look)) {
         dprint("Block: get Look = %c\n", Look);
         switch (Look) {
             case 'i':
-                DoIf();
+                DoIf(L);
                 break;
             case 'w':
                 DoWhile();
@@ -51,6 +52,8 @@ void Block()
             case 'd':
                 DoDo();
                 break;
+            case 'b':
+                DoBreak(L);
             default:
                 Other();
                 break;
@@ -68,14 +71,14 @@ void Condition()
 
 void DoProgram()
 {
-    Block();
+    Block(NULL);
     if (Look != 'e') {
         Expected("End");
     }
     EmitLn("END");
 }
 
-void DoIf()
+void DoIf(char *L)
 {
     char L1[MAX_BUF];
     char L2[MAX_BUF];
@@ -88,7 +91,7 @@ void DoIf()
     sprintf(tmp, "jz %s", L1);
     EmitLn(tmp);
 
-    Block();
+    Block(L);
     dprint("DoIf: Got Look = %c\n", Look);
 
     if (Look == 'l') {
@@ -101,7 +104,7 @@ void DoIf()
 
         PostLabel(L1);
 
-        Block();
+        Block(L);
     }
 
     Match('e');
@@ -120,7 +123,7 @@ void DoWhile()
     Condition();
     sprintf(tmp, "jz %s", L2);
     EmitLn(tmp);
-    Block();
+    Block(L2);
     Match('e');
     sprintf(tmp, "jmp %s", L1);
     EmitLn(tmp);
@@ -129,28 +132,34 @@ void DoWhile()
 
 void DoLoop()
 {
-    char L[MAX_BUF];
+    char L1[MAX_BUF];
+    char L2[MAX_BUF];
     Match('p');
-    strcpy(L, NewLabel());
-    PostLabel(L);
-    Block();
+    strcpy(L1, NewLabel());
+    strcpy(L2, NewLabel());
+    PostLabel(L1);
+    Block(L2);
     Match('e');
-    sprintf(tmp, "jmp %s", L);
+    sprintf(tmp, "jmp %s", L1);
     EmitLn(tmp);
+    PostLabel(L2);
 }
 
 void DoRepeat()
 {
-    char L[MAX_BUF];
+    char L1[MAX_BUF];
+    char L2[MAX_BUF];
     Match('r');
-    strcpy(L, NewLabel());
-    PostLabel(L);
-    Block();
+    strcpy(L1, NewLabel());
+    strcpy(L2, NewLabel());
+    PostLabel(L1);
+    Block(L2);
     Match('u');
     Condition();
 
-    sprintf(tmp, "jz %s", L);
+    sprintf(tmp, "jz %s", L1);
     EmitLn(tmp);
+    PostLabel(L2);
 }
 
 /* I haven't test the actual generated x86 code here, so you're free to
@@ -181,7 +190,7 @@ void DoFor()
     EmitLn("cmp (%esp), %eax");
     sprintf(tmp, "jg %s", L2);
     EmitLn(tmp);
-    Block();
+    Block(L2);
     Match('e');
     sprintf(tmp, "jmp %s", L1);
     EmitLn(tmp);
@@ -197,17 +206,33 @@ void Expression()
 void DoDo()
 {
     Match('d');
-    char L[MAX_BUF];
-    strcpy(L, NewLabel());
+    char L1[MAX_BUF];
+    char L2[MAX_BUF];
+    strcpy(L1, NewLabel());
+    strcpy(L2, NewLabel());
     Expression();
     EmitLn("subl %eax, $1");
     EmitLn("movl %eax, %ecx");
-    PostLabel(L);
+    PostLabel(L1);
     EmitLn("pushl %ecx");
-    Block();
+    Block(L2);
     EmitLn("popl %ecx");
-    sprintf(tmp, "loop %s", L);
+    sprintf(tmp, "loop %s", L1);
     EmitLn(tmp);
+    EmitLn("pushl %ecx");
+    PostLabel(L2);
+    EmitLn("popl %ecx");
+}
+
+void DoBreak(char *L)
+{
+    Match('b');
+    if (L != NULL) {
+        sprintf(tmp, "jmp %s", L);
+        EmitLn(tmp);
+    } else {
+        Abort("No loop to break from");
+    }
 }
 
 int main()
