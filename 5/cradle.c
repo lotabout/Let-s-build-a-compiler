@@ -11,7 +11,7 @@ static int Table[TABLE_SIZE];
 /* Helper Functions */
 char uppercase(char c)
 {
-    return (c | 0x20);
+    return (c & 0xDF);
 }
 
 void GetChar() 

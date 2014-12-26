@@ -5,7 +5,7 @@
 /* Helper Functions */
 char uppercase(char c)
 {
-    return (c | 0x20);
+    return (c & 0xDD);
 }
 
 void GetChar() 
