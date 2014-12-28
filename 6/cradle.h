@@ -33,4 +33,6 @@ void InitTable();
 
 char *NewLabel();
 void PostLabel(char *label);
+
+void Fin();
 #endif

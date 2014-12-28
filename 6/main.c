@@ -44,6 +44,7 @@ void Term();
 void Add();
 void Subtract();
 void Expression();
+void Assignment();
 
 void Other()
 {
@@ -77,12 +78,13 @@ void Block(char *L)
             case 'b':
                 DoBreak(L);
             default:
-                Other();
+                Assignment();
                 break;
         }
         /* this is for convinent, otherwise newline character will
         cause an error */
-        Newline();
+        /*Newline();*/
+        Fin();
     }
 }
 
@@ -345,7 +347,7 @@ void Equals()
     Match('=');
     Expression();
     EmitLn("cmp (%esp), %eax");
-    /* Note that 80386 has setcc corresponds to 86000's SETCC 
+    /* Note that 80386 has setcc corresponds to 86000's SETCC
      * However, it only takes 8-bit registers */
     EmitLn("sete %al");
     EmitLn("addl $4, %esp");     /* recover the stack */
@@ -432,7 +434,7 @@ void Multiply()
     EmitLn("imull (%esp), %eax");
     /* push of the stack */
     EmitLn("addl $4, %esp");
-} 
+}
 
 void Divide()
 {
@@ -440,7 +442,7 @@ void Divide()
     Factor();
 
     /* for a expersion like a/b we have eax=b and %(esp)=a
-     * but we need eax=a, and b on the stack 
+     * but we need eax=a, and b on the stack
      */
     EmitLn("movl (%esp), %edx");
     EmitLn("addl $4, %esp");
@@ -509,6 +511,16 @@ void Expression()
                 Expected("Addop");
         }
     }
+}
+
+void Assignment()
+{
+    char c = GetName();
+    Match('=');
+    BoolExpression();
+    sprintf(tmp, "lea %c, %%ebx", c);
+    EmitLn(tmp);
+    EmitLn("movl %eax, (%ebx)");
 }
 
 int main()

@@ -172,3 +172,13 @@ void PostLabel(char *label)
 {
     printf("%s:\n", label);
 }
+
+void Fin()
+{
+    if (Look == '\r') {
+        GetChar();
+    }
+    if (Look == '\n') {
+        GetChar();
+    }
+}
