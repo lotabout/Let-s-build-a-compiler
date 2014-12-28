@@ -25,10 +25,26 @@ void DoDo();
 void DoBreak(char *L);
 
 /* Added in chap6 */
+void BoolFactor();
+void NotFactor();
 void BoolTerm();
 void BoolExpression();
 void BoolOr();
 void BoolXor();
+void Relation();
+void Equals();
+void NotEquals();
+void Less();
+void Greater();
+void Ident();
+void Factor();
+void SignedFactor();
+void Multiply();
+void Divide();
+void Term();
+void Add();
+void Subtract();
+void Expression();
 
 void Other()
 {
@@ -205,11 +221,6 @@ void DoFor()
     EmitLn("pop %eax");
 }
 
-void Expression()
-{
-    EmitLn("<expression>");
-}
-
 void DoDo()
 {
     Match('d');
@@ -242,16 +253,62 @@ void DoBreak(char *L)
     }
 }
 
+void BoolFactor()
+{
+    if (IsBoolean(Look)) {
+        if (GetBoolean()) {
+            EmitLn("movl $-1, %eax");
+        } else {
+            EmitLn("xor %eax, %eax");
+        }
+    } else {
+        Relation();
+    }
+}
+
+void Relation()
+{
+    Expression();
+    if (IsRelop(Look)) {
+        EmitLn("pushl %eax");
+        switch (Look) {
+            case '=':
+                Equals();
+                break;
+            case '#':
+                NotEquals();
+                break;
+            case '<':
+                Less();
+                break;
+            case '>':
+                Greater();
+                break;
+        }
+    }
+    EmitLn("test %eax, %eax");
+}
+
+void NotFactor()
+{
+    if (Look == '!') {
+        Match('!');
+        BoolFactor();
+        EmitLn("xor $-1, %eax");
+    } else {
+        BoolFactor();
+    }
+}
+
 void BoolTerm()
 {
-    if (!IsBoolean(Look)) {
-        Expected("Boolean Literal");
-    }
-
-    if (GetBoolean()) {
-        EmitLn("movl $-1, %eax");
-    } else {
-        EmitLn("xor %eax, %eax");
+    NotFactor();
+    while(Look == '&') {
+        EmitLn("pushl %eax");
+        Match('&');
+        NotFactor();
+        EmitLn("and (%esp), %eax");
+        EmitLn("addl $4, %esp");
     }
 }
 
@@ -287,6 +344,181 @@ void BoolXor()
     BoolTerm();
     EmitLn("xor (%esp), %eax");
     EmitLn("addl $4, %esp");    /* recover the stack */
+}
+
+void Equals()
+{
+    Match('=');
+    Expression();
+    EmitLn("cmp (%esp), %eax");
+    /* Note that 80386 has setcc corresponds to 86000's SETCC 
+     * However, it only takes 8-bit registers */
+    EmitLn("xor %eax, %eax");
+    EmitLn("sete %al");
+    EmitLn("addl $4, %esp");     /* recover the stack */
+}
+
+void NotEquals()
+{
+    Match('#');
+    Expression();
+    EmitLn("cmp (%esp), %eax");
+    EmitLn("xor %eax, %eax");
+    EmitLn("setne %al");
+    EmitLn("addl $4, %esp");     /* recover the stack */
+}
+
+void Less()
+{
+    Match('<');
+    Expression();
+    EmitLn("cmp %eax, (%esp)");
+    EmitLn("xor %eax, %eax");
+    EmitLn("setl %al");
+    EmitLn("addl $4, %esp");     /* recover the stack */
+}
+
+void Greater()
+{
+    Match('>');
+    Expression();
+    EmitLn("cmp %eax, (%esp)");
+    EmitLn("xor %eax, %eax");
+    EmitLn("setg %al");
+    EmitLn("addl $4, %esp");     /* recover the stack */
+}
+
+void Ident()
+{
+    char c = GetName();
+    if (Look == '(') {
+        Match('(');
+        Match(')');
+        sprintf(tmp, "call %c", c);
+        EmitLn(tmp);
+    } else {
+        sprintf(tmp, "movl %c, %%eax", c);
+        EmitLn(tmp);
+    }
+}
+
+void Factor()
+{
+    if (Look == '(') {
+        Match('(');
+        Expression();
+        Match(')');
+    } else if (IsAlpha(Look)) {
+        Ident();
+    } else {
+        sprintf(tmp, "movl $%d, %%eax", GetNum());
+        EmitLn(tmp);
+    }
+}
+
+void SignedFactor()
+{
+    if (Look == '+') {
+        GetChar();
+        Factor();
+    } else if (Look == '-') {
+        GetChar();
+        if (IsDigit(Look)) {
+            sprintf(tmp, "movl $-%d, %%eax", GetNum());
+            EmitLn(tmp);
+        } else {
+            Factor();
+            EmitLn("neg %eax");
+        }
+    } else {
+        Factor();
+    }
+}
+
+void Multiply()
+{
+    Match('*');
+    Factor();
+    EmitLn("imull (%esp), %eax");
+    /* push of the stack */
+    EmitLn("addl $4, %esp");
+} 
+
+void Divide()
+{
+    Match('/');
+    Factor();
+
+    /* for a expersion like a/b we have eax=b and %(esp)=a
+     * but we need eax=a, and b on the stack 
+     */
+    EmitLn("movl (%esp), %edx");
+    EmitLn("addl $4, %esp");
+
+    EmitLn("pushl %eax");
+
+    EmitLn("movl %edx, %eax");
+
+    /* sign extesnion */
+    EmitLn("sarl $31, %edx");
+    EmitLn("idivl (%esp)");
+    EmitLn("addl $4, %esp");
+
+}
+
+void Term()
+{
+    SignedFactor();
+    while (strchr("*/", Look)) {
+        EmitLn("pushl %eax");
+        switch(Look)
+        {
+            case '*':
+                Multiply();
+                break;
+            case '/':
+                Divide();
+                break;
+            default:
+                Expected("Mulop");
+        }
+    }
+}
+
+void Add()
+{
+    Match('+');
+    Term();
+    EmitLn("addl (%esp), %eax");
+    EmitLn("addl $4, %esp");
+}
+
+
+void Subtract()
+{
+    Match('-');
+    Term();
+    EmitLn("subl (%esp), %eax");
+    EmitLn("negl %eax");
+    EmitLn("addl $4, %esp");
+}
+
+void Expression()
+{
+    Term();
+    while(IsAddop(Look)) {
+        EmitLn("pushl %eax");
+        switch (Look) {
+            case '+':
+                Add();
+                break;
+            case '-':
+                Subtract();
+                break;
+            default:
+                Expected("Addop");
+        }
+    }
 }
 
 int main()
