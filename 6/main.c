@@ -13,7 +13,6 @@
 
 void Other();
 void Block(char *L);
-void Condition();
 void DoProgram();
 void DoIf(char *L);
 void DoWhile();
@@ -87,11 +86,6 @@ void Block(char *L)
     }
 }
 
-void Condition()
-{
-    EmitLn("<codition>");
-}
-
 void DoProgram()
 {
     Block(NULL);
@@ -109,7 +103,7 @@ void DoIf(char *L)
     strcpy(L2, L1);
 
     Match('i');
-    Condition();
+    BoolExpression();
 
     sprintf(tmp, "jz %s", L1);
     EmitLn(tmp);
@@ -143,7 +137,7 @@ void DoWhile()
     strcpy(L1, NewLabel());
     strcpy(L2, NewLabel());
     PostLabel(L1);
-    Condition();
+    BoolExpression();
     sprintf(tmp, "jz %s", L2);
     EmitLn(tmp);
     Block(L2);
@@ -178,7 +172,7 @@ void DoRepeat()
     PostLabel(L1);
     Block(L2);
     Match('u');
-    Condition();
+    BoolExpression();
 
     sprintf(tmp, "jz %s", L1);
     EmitLn(tmp);
@@ -353,7 +347,6 @@ void Equals()
     EmitLn("cmp (%esp), %eax");
     /* Note that 80386 has setcc corresponds to 86000's SETCC 
      * However, it only takes 8-bit registers */
-    EmitLn("xor %eax, %eax");
     EmitLn("sete %al");
     EmitLn("addl $4, %esp");     /* recover the stack */
 }
@@ -363,7 +356,6 @@ void NotEquals()
     Match('#');
     Expression();
     EmitLn("cmp (%esp), %eax");
-    EmitLn("xor %eax, %eax");
     EmitLn("setne %al");
     EmitLn("addl $4, %esp");     /* recover the stack */
 }
@@ -373,7 +365,6 @@ void Less()
     Match('<');
     Expression();
     EmitLn("cmp %eax, (%esp)");
-    EmitLn("xor %eax, %eax");
     EmitLn("setl %al");
     EmitLn("addl $4, %esp");     /* recover the stack */
 }
@@ -383,7 +374,6 @@ void Greater()
     Match('>');
     Expression();
     EmitLn("cmp %eax, (%esp)");
-    EmitLn("xor %eax, %eax");
     EmitLn("setg %al");
     EmitLn("addl $4, %esp");     /* recover the stack */
 }
@@ -524,7 +514,6 @@ void Expression()
 int main()
 {
     Init();
-    /*DoProgram();*/
-    BoolExpression();
+    DoProgram();
     return 0;
 }
