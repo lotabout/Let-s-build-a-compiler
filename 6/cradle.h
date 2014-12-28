@@ -18,6 +18,7 @@ int IsAlpha(char c);
 int IsDigit(char c);
 int IsAddop(char c);
 int IsBoolean(char c);
+int IsOrop(char c);
 
 char GetName();
 int GetNum();

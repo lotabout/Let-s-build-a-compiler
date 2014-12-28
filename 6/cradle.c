@@ -123,6 +123,11 @@ int GetBoolean()
     return ret;
 }
 
+int IsOrop(char c)
+{
+    return strchr("|~", c) != NULL;
+}
+
 void Emit(char *s)
 {
     printf("\t%s", s);

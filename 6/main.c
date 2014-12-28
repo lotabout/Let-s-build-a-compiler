@@ -10,6 +10,7 @@
 #define dprint(fmt, ...)
 #endif
 
+
 void Other();
 void Block(char *L);
 void Condition();
@@ -22,6 +23,12 @@ void DoFor();
 void Expression();
 void DoDo();
 void DoBreak(char *L);
+
+/* Added in chap6 */
+void BoolTerm();
+void BoolExpression();
+void BoolOr();
+void BoolXor();
 
 void Other()
 {
@@ -235,10 +242,57 @@ void DoBreak(char *L)
     }
 }
 
+void BoolTerm()
+{
+    if (!IsBoolean(Look)) {
+        Expected("Boolean Literal");
+    }
+
+    if (GetBoolean()) {
+        EmitLn("movl $-1, %eax");
+    } else {
+        EmitLn("xor %eax, %eax");
+    }
+}
+
+void BoolExpression()
+{
+    BoolTerm();
+    while (IsOrop(Look)) {
+        EmitLn("pushl %eax");
+        switch (Look) {
+            case '|':
+                BoolOr();
+                break;
+            case '~':
+                BoolXor();
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+void BoolOr()
+{
+    Match('|');
+    BoolTerm();
+    EmitLn("or (%esp), %eax");
+    EmitLn("addl $4, %esp");    /* recover the stack */
+}
+
+void BoolXor()
+{
+    Match('~');
+    BoolTerm();
+    EmitLn("xor (%esp), %eax");
+    EmitLn("addl $4, %esp");    /* recover the stack */
+}
+
 int main()
 {
     Init();
     /*DoProgram();*/
-    printf("%c\n", GetBoolean());
+    BoolExpression();
     return 0;
 }
