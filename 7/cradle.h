@@ -14,6 +14,8 @@ void Match(char x);
 void Newline();
 
 int IsWhite(char c);
+int IsOp(char c);
+
 int IsAlpha(char c);
 int IsDigit(char c);
 int IsAlNum(char c);
@@ -24,6 +26,7 @@ int IsRelop(char c);
 
 char* GetName();
 char *GetNum();
+char *GetOp();
 int GetBoolean();
 
 void SkipWhite();

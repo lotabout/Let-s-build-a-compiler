@@ -70,7 +70,12 @@ void Newline()
 
 int IsWhite(char c)
 {
-    return (c == ' ') || (c == '\t');
+    return strchr(" \t\r\n", c) != NULL;
+}
+
+int IsOp(char c)
+{
+    return strchr("+-*/<>:=", c) != NULL;
 }
 
 int IsAlpha(char c)
@@ -127,6 +132,24 @@ char *GetNum()
     }
 
     while (IsDigit(Look)) {
+        *p++ = Look;
+        GetChar();
+    }
+    SkipWhite();
+    *p = '\0';
+
+    return token_buf;
+}
+
+char *GetOp()
+{
+    char *p = token_buf;
+    if( !IsOp(Look)) {
+        sprintf(tmp, "Operator");
+        Expected(tmp);
+    }
+
+    while (IsOp(Look)) {
         *p++ = Look;
         GetChar();
     }

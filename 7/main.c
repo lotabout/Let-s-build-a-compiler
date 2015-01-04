@@ -19,6 +19,8 @@ char *Scan()
         strcpy(ret, GetName());
     } else if (IsDigit(Look)) {
         strcpy(ret, GetNum());
+    } else if (IsOp(Look)) {
+        strcpy(ret, GetOp());
     } else {
         ret[0] = Look;
         ret[1] = '\0';
@@ -34,7 +36,10 @@ int main()
     Init();
     do {
         token = Scan();
-        printf("%s\n", token);
-    } while(strcmp(token, "\n") != 0);
+        printf("==> %s\n", token);
+        if (strcmp(token, "\r") == 0) {
+            Fin();
+        }
+    } while(strcmp(token, ".") != 0);
     return 0;
 }
