@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "cradle.h"
 
@@ -10,36 +11,30 @@
 #define dprint(fmt, ...)
 #endif
 
-static char scan_buf[MAX_BUF];
-
-char *Scan()
-{
-    char *ret = scan_buf;
-    if (IsAlpha(Look)) {
-        strcpy(ret, GetName());
-    } else if (IsDigit(Look)) {
-        strcpy(ret, GetNum());
-    } else if (IsOp(Look)) {
-        strcpy(ret, GetOp());
-    } else {
-        ret[0] = Look;
-        ret[1] = '\0';
-    }
-    SkipWhite();
-
-    return ret;
-}
-
 int main()
 {
-    char *token;
     Init();
     do {
-        token = Scan();
-        printf("==> %s\n", token);
-        if (strcmp(token, "\r") == 0) {
-            Fin();
+        Scan();
+        switch (Token) {
+            case Ident:
+                printf("--> Ident:");
+                break;
+            case Number:
+                printf("--> Number:");
+                break;
+            case Operator:
+                printf("--> Operator:");
+                break;
+            case IfSym:
+            case ElseSym:
+            case EndifSym:
+            case EndSym:
+                printf("--> keyword:");
+                break;
         }
-    } while(strcmp(token, ".") != 0);
+        printf("%s\n", Value);
+    } while(Token != EndSym);
+
     return 0;
 }

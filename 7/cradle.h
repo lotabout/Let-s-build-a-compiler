@@ -3,6 +3,17 @@
 
 #define MAX_BUF 100
 char Look;
+enum Symtype { 
+    IfSym,
+    ElseSym,
+    EndifSym,
+    EndSym,
+    Ident,
+    Number,
+    Operator,
+};
+extern enum Symtype Token;      /* current token */
+extern char Value[MAX_BUF];     /* string token of Look */
 
 void GetChar();
 
@@ -24,11 +35,12 @@ int IsBoolean(char c);
 int IsOrop(char c);
 int IsRelop(char c);
 
-char* GetName();
-char *GetNum();
-char *GetOp();
+void GetName();
+void GetNum();
+void GetOp();
 int GetBoolean();
 
+void Scan();
 void SkipWhite();
 
 void Emit(char *s);

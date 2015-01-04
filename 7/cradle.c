@@ -2,14 +2,67 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define TABLE_SIZE 26
 static int LCount = 0;
 static char labelName[MAX_BUF];
 /*static char identifier[MAX_BUF];*/
 static int Table[TABLE_SIZE];
-static char token_buf[MAX_BUF];        /* buffer to store token string */
 static char tmp[MAX_BUF];
+
+
+/* Keywords symbol table */
+const char const *KWList[] = {
+    "IF",
+    "ELSE",
+    "ENDIF",
+    "END",
+};
+const int KWNum = sizeof(KWList)/sizeof(*KWList);
+
+enum Symtype Token;      /* current token */
+char Value[MAX_BUF];     /* string token of Look */
+
+/* Table Lookup
+ * If the input string matches a table entry, return the entry index, else
+ * return -1.
+ * *n* is the size of the table */
+int Lookup(const char const *table[], const char *string, int n)
+{
+    int i;
+    bool found = false;
+
+    for (i = 0; i < n; ++i) {
+        if (strcmp(table[i], string) == 0) {
+            found = true;
+            break;
+        }
+    }
+    return found ? i : -1;
+}
+
+
+void Scan()
+{ 
+    /* in Unix/Linux, Endline is CR instead of LF CR in MSDOS*/
+    SkipWhite();   
+    while(Look == '\n') {
+        Fin();
+    }
+
+    if (IsAlpha(Look)) {
+        GetName();
+    } else if (IsDigit(Look)) {
+        GetNum();
+    } else if (IsOp(Look)) {
+        GetOp();
+    }else {
+        Value[0] = Look;
+        Value[1] = '\0';
+        GetChar();
+    }
+}
 
 /* Helper Functions */
 char uppercase(char c)
@@ -103,60 +156,55 @@ int IsAlNum(char c)
     return IsAlpha(c) || IsDigit(c);
 }
 
-char *GetName()
+void GetName()
 {
-    char *p = token_buf;
-
-    if( !IsAlpha(Look)) {
-        sprintf(tmp, "Name");
-        Expected(tmp);
+    char *p = Value;
+    if (!IsAlpha(Look)) {
+        Expected("Name");
     }
 
     while(IsAlNum(Look)) {
         *p++ = uppercase(Look);
         GetChar();
     }
-    SkipWhite();
     *p = '\0';
 
-    return token_buf;
+    int index = Lookup(KWList, Value, KWNum);
+    if (index == -1) {
+        Token = Ident;
+    } else {
+        Token = index; /* directly assign integer to enum type */
+    }
 }
 
-
-char *GetNum()
+void GetNum()
 {
-    char *p = token_buf;
+    char *p = Value;
     if( !IsDigit(Look)) {
-        sprintf(tmp, "Integer");
-        Expected(tmp);
+        Expected("Integer");
     }
 
     while (IsDigit(Look)) {
         *p++ = Look;
         GetChar();
     }
-    SkipWhite();
     *p = '\0';
-
-    return token_buf;
+    Token = Number;
 }
 
-char *GetOp()
+void GetOp()
 {
-    char *p = token_buf;
+    char *p = Value;
     if( !IsOp(Look)) {
-        sprintf(tmp, "Operator");
-        Expected(tmp);
+        Expected("Operator");
     }
 
     while (IsOp(Look)) {
         *p++ = Look;
         GetChar();
     }
-    SkipWhite();
     *p = '\0';
-
-    return token_buf;
+    Token = Operator;
 }
 
 int GetBoolean()
@@ -235,3 +283,4 @@ void Fin()
         GetChar();
     }
 }
+
