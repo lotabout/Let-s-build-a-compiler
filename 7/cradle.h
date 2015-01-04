@@ -3,17 +3,9 @@
 
 #define MAX_BUF 100
 char Look;
-enum Symtype { 
-    IfSym,
-    ElseSym,
-    EndifSym,
-    EndSym,
-    Ident,
-    Number,
-    Operator,
-};
-extern enum Symtype Token;      /* current token */
+extern char Token;      /* current token */
 extern char Value[MAX_BUF];     /* string token of Look */
+extern char tmp[MAX_BUF];
 
 void GetChar();
 
@@ -21,6 +13,7 @@ void Error(char *s);
 void Abort(char *s);
 void Expected(char *s);
 void Match(char x);
+void MatchString(char *str);
 
 void Newline();
 

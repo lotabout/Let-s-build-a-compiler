@@ -9,7 +9,7 @@ static int LCount = 0;
 static char labelName[MAX_BUF];
 /*static char identifier[MAX_BUF];*/
 static int Table[TABLE_SIZE];
-static char tmp[MAX_BUF];
+char tmp[MAX_BUF];
 
 
 /* Keywords symbol table */
@@ -19,9 +19,10 @@ const char const *KWList[] = {
     "ENDIF",
     "END",
 };
+const char KWCode[] = "xilee";
 const int KWNum = sizeof(KWList)/sizeof(*KWList);
 
-enum Symtype Token;      /* current token */
+char Token;      /* current token */
 char Value[MAX_BUF];     /* string token of Look */
 
 /* Table Lookup
@@ -51,17 +52,9 @@ void Scan()
         Fin();
     }
 
-    if (IsAlpha(Look)) {
-        GetName();
-    } else if (IsDigit(Look)) {
-        GetNum();
-    } else if (IsOp(Look)) {
-        GetOp();
-    }else {
-        Value[0] = Look;
-        Value[1] = '\0';
-        GetChar();
-    }
+    GetName();
+    int index = Lookup(KWList, Value, KWNum);
+    Token = KWCode[index+1];
 }
 
 /* Helper Functions */
@@ -105,6 +98,14 @@ void Match(char x)
         GetChar();
     } else {
         sprintf(tmp, "' %c ' ",  x);
+        Expected(tmp);
+    }
+}
+
+void MatchString(char *str)
+{
+    if (strcmp(Value, str) != 0) {
+        sprintf(tmp, "\"%s\"", Value);
         Expected(tmp);
     }
 }
@@ -158,6 +159,11 @@ int IsAlNum(char c)
 
 void GetName()
 {
+    SkipWhite();   
+    while(Look == '\n') {
+        Fin();
+    }
+
     char *p = Value;
     if (!IsAlpha(Look)) {
         Expected("Name");
@@ -168,17 +174,11 @@ void GetName()
         GetChar();
     }
     *p = '\0';
-
-    int index = Lookup(KWList, Value, KWNum);
-    if (index == -1) {
-        Token = Ident;
-    } else {
-        Token = index; /* directly assign integer to enum type */
-    }
 }
 
 void GetNum()
 {
+    SkipWhite();
     char *p = Value;
     if( !IsDigit(Look)) {
         Expected("Integer");
@@ -189,22 +189,7 @@ void GetNum()
         GetChar();
     }
     *p = '\0';
-    Token = Number;
-}
-
-void GetOp()
-{
-    char *p = Value;
-    if( !IsOp(Look)) {
-        Expected("Operator");
-    }
-
-    while (IsOp(Look)) {
-        *p++ = Look;
-        GetChar();
-    }
-    *p = '\0';
-    Token = Operator;
+    Token = '#';
 }
 
 int GetBoolean()
