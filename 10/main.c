@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "cradle.h"
 
@@ -10,6 +11,7 @@
 #define dprint(fmt, ...)
 #endif
 
+
 void Prog();
 void Prolog();
 void Epilog();
@@ -18,6 +20,7 @@ void Main();
 void Decl();
 void TopDecls();
 void Alloc(char);
+
 
 void Prog()
 {
@@ -83,6 +86,11 @@ void Decl()
 
 void Alloc(char name)
 {
+    if (InTable(name)) {
+        sprintf(tmp, "Duplicate Variable Name: %c", name);
+        Abort(tmp);
+    }
+    ST[name - 'A'] = 'v';
     sprintf(tmp, "%c: .int ", name);
     Emit(tmp);
     if (Look == '=') {
@@ -98,6 +106,7 @@ void Alloc(char name)
         EmitLn("0");
     }
 }
+
 
 int main()
 {

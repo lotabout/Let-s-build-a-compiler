@@ -1,13 +1,14 @@
 #include "cradle.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #define TABLE_SIZE 26
 static int LCount = 0;
 static char labelName[MAX_BUF];
 char tmp[MAX_BUF];
 
-static int Table[TABLE_SIZE];
+char ST[TABLE_SIZE];
 
 /* Helper Functions */
 char uppercase(char c)
@@ -132,9 +133,14 @@ void InitTable()
 {
     int i;
     for (i = 0; i < TABLE_SIZE; i++) {
-        Table[i] = 0;
+        ST[i] = ' ';
     }
 
+}
+
+bool InTable(char name)
+{
+    return ST[name - 'A'] != ' ';
 }
 
 char *NewLabel()

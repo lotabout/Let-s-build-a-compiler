@@ -1,8 +1,10 @@
 #ifndef _CRADLE_H
 #define _CRADLE_H
+#include <stdbool.h>
 
 #define MAX_BUF 100
 extern char tmp[MAX_BUF];
+extern char ST[];
 char Look;
 
 void GetChar();
@@ -26,6 +28,7 @@ void EmitLn(char *s);
 
 void Init();
 void InitTable();
+bool InTable(char name);
 
 char *NewLabel();
 void PostLabel(char *label);
