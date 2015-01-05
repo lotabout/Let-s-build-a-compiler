@@ -79,6 +79,11 @@ int IsAddop(char c)
     return (c == '+') || (c == '-');
 }
 
+int IsMulop(char c)
+{
+    return (c == '*') || (c == '/');
+}
+
 char GetName()
 {
     char c = Look;
@@ -153,4 +158,99 @@ char *NewLabel()
 void PostLabel(char *label)
 {
     printf("%s:\n", label);
+}
+
+/* re-targetable routines */
+void Clear()
+{
+    EmitLn("xor %eax, %eax");
+}
+
+void Negate()
+{
+    EmitLn("neg %eax");
+}
+
+void LoadConst(int n)
+{
+    sprintf(tmp, "movl $%d, %%eax", n);
+    EmitLn(tmp);
+}
+
+/* Load a variable to primary register */
+void LoadVar(char name)
+{
+    if (!InTable(name)) {
+        char name_string[MAX_BUF];
+        name_string[0] = name;
+        name_string[1] = '\0';
+        Undefined(name_string);
+    }
+    sprintf(tmp, "movl %c, %%eax", name);
+    EmitLn(tmp);
+}
+
+
+/* Push Primary onto stack */
+void Push()
+{
+    EmitLn("pushl %eax");
+}
+
+/* Add Top of Stack to primary */
+void PopAdd()
+{
+    EmitLn("addl (%esp), %eax");
+    EmitLn("addl $4, %esp");
+}
+
+/* Subtract Primary from Top of Stack */
+void PopSub()
+{
+    EmitLn("subl (%esp), %eax");
+    EmitLn("neg %eax");
+    EmitLn("addl $4, %esp");
+}
+
+/* multiply top of stack by primary */
+void PopMul()
+{
+    EmitLn("imull (%esp), %eax");
+    EmitLn("addl $4, %esp");
+}
+
+/* divide top of stack by primary */
+void PopDiv()
+{
+    /* for a expersion like a/b we have eax=b and %(esp)=a
+     * but we need eax=a, and b on the stack
+     */
+    EmitLn("movl (%esp), %edx");
+    EmitLn("addl $4, %esp");
+    EmitLn("pushl %eax");
+    EmitLn("movl %edx, %eax");
+
+    /* sign extesnion */
+    EmitLn("sarl $31, %edx");
+    EmitLn("idivl (%esp)");
+    EmitLn("addl $4, %esp");
+}
+
+/* store primary to variable */
+void Store(char name)
+{
+    if (!InTable(name)) {
+        char name_string[MAX_BUF];
+        name_string[0] = name;
+        name_string[1] = '\0';
+        Undefined(name_string);
+    }
+    sprintf(tmp, "movl %%eax, %c", name);
+    EmitLn(tmp);
+}
+
+void Undefined(char *name)
+{
+    sprintf(tmp, "Undefined Identifier: %s", name);
+    Abort(tmp);
 }

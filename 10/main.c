@@ -20,7 +20,20 @@ void Main();
 void Decl();
 void TopDecls();
 void Alloc(char);
+void Block();
+void Assignment();
 
+void Factor();
+void NegFactor();
+void Expression();
+void Subtract();
+void FirstTerm();
+void Term();
+void Term1();
+void Divide();
+void Multiply();
+void FirstFactor();
+void Add();
 
 void Prog()
 {
@@ -53,6 +66,7 @@ void Main()
 {
     Match('b');
     Prolog();
+    Block();
     Match('e');
     Epilog();
 }
@@ -107,6 +121,135 @@ void Alloc(char name)
     }
 }
 
+void Block()
+{
+    while(strchr("e", Look) == NULL) {
+        Assignment();
+    }
+}
+
+void Assignment()
+{
+    char name = GetName();
+    Match('=');
+    Expression();
+    Store(name);
+}
+
+void Factor()
+{
+    if (Look == '(') {
+        Match('(');
+        Expression();
+        Match(')');
+    } else if (IsAlpha(Look)) {
+        LoadVar(GetName());
+    } else {
+        LoadConst(GetNum());
+    }
+}
+
+void NegFactor()
+{
+    Match('-');
+    if (IsDigit(Look)) {
+        LoadConst(-GetNum());
+    } else {
+        Factor();
+        Negate();
+    }
+}
+
+/* Parse and Translate a Leading Factor */
+void FirstFactor()
+{
+    switch (Look) {
+        case '+':
+            Match('+');
+            Factor();
+            break;
+        case '-':
+            NegFactor();
+            break;
+        default:
+            Factor();
+    }
+}
+
+void Multiply()
+{
+    Match('*');
+    Factor();
+    PopMul();
+}
+
+void Divide()
+{
+    Match('/');
+    Factor();
+    PopDiv();
+}
+
+void Term1()
+{
+    while(IsMulop(Look)) {
+        Push();
+        switch(Look) {
+            case '*':
+                Multiply();
+                break;
+            case '/':
+                Divide();
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+void Term()
+{
+    Factor();
+    Term1();
+}
+
+void FirstTerm()
+{
+    FirstFactor();
+    Term1();
+}
+
+void Add()
+{
+    Match('+');
+    Term();
+    PopAdd();
+}
+
+void Subtract()
+{
+    Match('-');
+    Term();
+    PopSub();
+}
+
+void Expression()
+{
+    FirstTerm();
+    while(IsAddop(Look)) {
+        Push();
+        switch(Look) {
+            case '+':
+                Add();
+                break;
+            case '-':
+                Subtract();
+                break;
+            default:
+                break;
+        }
+    }
+}
 
 int main()
 {

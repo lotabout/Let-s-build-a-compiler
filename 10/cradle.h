@@ -19,6 +19,7 @@ void Newline();
 int IsAlpha(char c);
 int IsDigit(char c);
 int IsAddop(char c);
+int IsMulop(char c);
 
 char GetName();
 int GetNum();
@@ -32,4 +33,19 @@ bool InTable(char name);
 
 char *NewLabel();
 void PostLabel(char *label);
+
+/* re-targetable routines */
+void Clear();
+void Negate();
+void LoadConst(int n);
+void LoadVar(char name);
+void Push();
+void PopAdd();
+void PopSub();
+void PopMul();
+void PopDiv();
+void Store(char name);
+void Undefined(char *name);
+
+
 #endif
