@@ -20,9 +20,8 @@ void Prog()
 {
     Match('p');     /* handles program header part */
     Header();
-    Prolog();
+    Main();
     Match('.');
-    Epilog();
 }
 
 void Header()
@@ -42,6 +41,15 @@ void Epilog()
     EmitLn("movl $1, %eax");
     EmitLn("int $0x80");
 }
+
+void Main()
+{
+    Match('b');
+    Prolog();
+    Match('e');
+    Epilog();
+}
+
 int main()
 {
     Init();
