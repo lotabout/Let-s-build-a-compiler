@@ -83,8 +83,20 @@ void Decl()
 
 void Alloc(char name)
 {
-    sprintf(tmp, "%c: .int 0", name);
-    EmitLn(tmp);
+    sprintf(tmp, "%c: .int ", name);
+    Emit(tmp);
+    if (Look == '=') {
+        Match('=');
+        if (Look == '-') {
+            Emit("-");
+            Match('-');
+        } else {
+            Emit("");
+        }
+        printf("%d\n", GetNum());
+    } else {
+        EmitLn("0");
+    }
 }
 
 int main()
