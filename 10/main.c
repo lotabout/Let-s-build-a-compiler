@@ -17,6 +17,7 @@ void Header();
 void Main();
 void Decl();
 void TopDecls();
+void Alloc(char);
 
 void Prog()
 {
@@ -29,12 +30,12 @@ void Prog()
 
 void Header()
 {
-    EmitLn(".text");
     EmitLn(".global _start");
 }
 
 void Prolog()
 {
+    EmitLn(".section .text");
     EmitLn("_start:");
 }
 
@@ -70,8 +71,20 @@ void TopDecls()
 
 void Decl()
 {
+    EmitLn(".section .data"); /* in case that the variable and function
+                                 declarations are mixed */
     Match('v');
-    GetChar();
+    Alloc(GetName());
+    while(Look == ',') {
+        GetChar();
+        Alloc(GetName());
+    }
+}
+
+void Alloc(char name)
+{
+    sprintf(tmp, "%c: .int 0", name);
+    EmitLn(tmp);
 }
 
 int main()
