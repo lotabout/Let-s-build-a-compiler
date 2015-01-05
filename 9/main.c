@@ -14,6 +14,14 @@ void Prolog(char name);
 void Epilog(char name);
 void Prog();
 void DoBlock(char name);
+void Declarations();
+void Labels();
+void Constants();
+void Types();
+void Variables();
+void DoProcedure();
+void DoFunction();
+void Statements();
 
 void Prog()
 {
@@ -44,6 +52,72 @@ void DoBlock(char name)
     sprintf(tmp, "%c", name);
     PostLabel(tmp);
     Statements();
+}
+
+void Declarations()
+{
+    while(strchr("lctvpf", Look) != NULL) {
+        switch(Look) {
+            case 'l':
+                Labels();
+                break;
+            case 'c':
+                Constants();
+                break;
+            case 't':
+                Types();
+                break;
+            case 'v':
+                Variables();
+                break;
+            case 'p':
+                DoProcedure();
+                break;
+            case 'f':
+                DoFunction();
+            default:
+                break;
+        }
+    }
+}
+
+void Labels()
+{
+    Match('l');
+}
+
+void Constants()
+{
+    Match('c');
+}
+
+void Types()
+{
+    Match('t');
+}
+
+void Variables()
+{
+    Match('v');
+}
+
+void DoProcedure()
+{
+    Match('p');
+}
+
+void DoFunction()
+{
+    Match('f');
+}
+
+void Statements()
+{
+    Match('b');
+    while(Look != 'e') {
+        GetChar();
+    }
+    Match('e');
 }
 
 int main()
