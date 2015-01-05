@@ -15,11 +15,14 @@ void Prolog();
 void Epilog();
 void Header();
 void Main();
+void Decl();
+void TopDecls();
 
 void Prog()
 {
     Match('p');     /* handles program header part */
     Header();
+    TopDecls();
     Main();
     Match('.');
 }
@@ -48,6 +51,27 @@ void Main()
     Prolog();
     Match('e');
     Epilog();
+}
+
+void TopDecls()
+{
+    while(Look != 'b') {
+        switch(Look) {
+            case 'v':
+                Decl();
+                break;
+            default:
+                sprintf(tmp, "Unrecognized Keyword '%c'", Look);
+                Abort(tmp);
+                break;
+        }
+    }
+}
+
+void Decl()
+{
+    Match('v');
+    GetChar();
 }
 
 int main()
