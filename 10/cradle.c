@@ -429,10 +429,24 @@ void SetGreater()
     EmitLn("movsx %al, %eax");
 }
 
+/* set %eax if Compare was >= */
+void SetGreaterOrEqual()
+{
+    EmitLn("setle %al");
+    EmitLn("movsx %al, %eax");
+}
+
 /* set %eax if Compare was < */
 void SetLess()
 {
     EmitLn("setg %al");
+    EmitLn("movsx %al, %eax");
+}
+
+/* set %eax if Compare was <= */
+void SetLessOrEqual()
+{
+    EmitLn("setge %al");
     EmitLn("movsx %al, %eax");
 }
 

@@ -37,6 +37,7 @@ void Add();
 void Equals();
 void NotEquals();
 void Less();
+void LessOrEqual();
 void Greater();
 void Relation();
 void NotFactor();
@@ -306,7 +307,7 @@ void Equals()
 /* Recognize and Translate a Relational "Not Equals" */
 void NotEquals()
 {
-    Match('#');
+    Match('>');
     Expression();
     PopCompare();
     SetNEqual();
@@ -316,18 +317,44 @@ void NotEquals()
 void Less()
 {
     Match('<');
+    switch(Look) {
+        case '=':
+            LessOrEqual();
+            break;
+        case '>':
+            NotEquals();
+            break;
+        default:
+            Expression();
+            PopCompare();
+            SetLess();
+            break;
+    }
+}
+
+/* Recognize and Translate a Relational "Less or Equal" */
+void LessOrEqual()
+{
+    Match('=');
     Expression();
     PopCompare();
-    SetLess();
+    SetLessOrEqual();
 }
 
 /* Recognize and Translate a Relational "Greater Than" */
 void Greater()
 {
     Match('>');
-    Expression();
-    PopCompare();
-    SetGreater();
+    if (Look == '=') {
+        Match('=');
+        Expression();
+        PopCompare();
+        SetGreaterOrEqual();
+    } else {
+        Expression();
+        PopCompare();
+        SetGreater();
+    }
 }
 
 /* Parse and Translate a Relation */

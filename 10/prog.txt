@@ -3,8 +3,8 @@ VAR xx,
 yy=1,
 zz=10
 BEGIN
-  WHILE yy < zz
-    IF yy < 5 
+  WHILE yy <= zz
+    IF yy <> 5 
       xx=xx+yy
     ELSE
       xx=xx+5

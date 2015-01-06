@@ -65,7 +65,9 @@ void PopCompare();
 void SetEqual();
 void SetNEqual();
 void SetGreater();
+void SetGreaterOrEqual();
 void SetLess();
+void SetLessOrEqual();
 void Branch(char *label);
 void BranchFalse(char *label);
 
