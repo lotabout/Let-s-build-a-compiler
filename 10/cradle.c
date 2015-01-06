@@ -1,8 +1,9 @@
-#include "cradle.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+
+#include "cradle.h"
 
 #define TABLE_SIZE 26
 static int LCount = 0;
@@ -11,10 +12,66 @@ char tmp[MAX_BUF];
 
 char ST[TABLE_SIZE];
 
+/* Keywords symbol table */
+const char const *KWList[] = {
+    "IF",
+    "ELSE",
+    "ENDIF",
+    "WHILE",
+    "ENDWHILE",
+    "VAR",
+    "BEGIN",
+    "END",
+    "PROGRAM"
+};
+const char KWCode[] = "xilewevbep";
+const int KWNum = sizeof(KWList)/sizeof(*KWList);
+
+char Token;             /* current token */
+char Value[MAX_BUF];    /* string token of Look */
+
 /* Helper Functions */
 char uppercase(char c)
 {
-    return (c & 0xDF);
+    if (IsAlpha(c)) {
+        return (c & 0xDF);
+    } else {
+        return c;
+    }
+}
+
+/* Table Lookup
+ * If the input string matches a table entry, return the entry index, else
+ * return -1.
+ * *n* is the size of the table */
+int Lookup(const char const *table[], const char *string, int n)
+{
+    int i;
+    bool found = false;
+
+    for (i = 0; i < n; ++i) {
+        if (strcmp(table[i], string) == 0) {
+            found = true;
+            break;
+        }
+    }
+    return found ? i : -1;
+}
+
+/* Get an Identifier and Scan it for keywords */
+void Scan()
+{ 
+    GetName();
+    int index = Lookup(KWList, Value, KWNum);
+    Token = KWCode[index+1];
+}
+
+void MatchString(char *str)
+{
+    if (strcmp(Value, str) != 0) {
+        sprintf(tmp, "\"%s\"", Value);
+        Expected(tmp);
+    }
 }
 
 void GetChar() 
@@ -45,24 +102,14 @@ void Expected(char *s)
 
 void Match(char x)
 {
+    NewLine();
     if(Look == x) {
         GetChar();
     } else {
         sprintf(tmp, "' %c ' ",  x);
         Expected(tmp);
     }
-}
-
-void Newline()
-{
-    if (Look == '\r') {
-        GetChar();
-        if (Look == '\n') {
-            GetChar();
-        }
-    } else if (Look == '\n') {
-        GetChar();
-    }
+    SkipWhite();
 }
 
 int IsAlpha(char c)
@@ -95,23 +142,36 @@ int IsRelop(char c)
     return strchr("=#<>", c) != NULL;
 }
 
-char GetName()
+int IsWhite(char c)
 {
-    char c = Look;
+    return strchr(" \t\r\n", c) != NULL;
+}
 
+int IsAlNum(char c)
+{
+    return IsAlpha(c) || IsDigit(c);
+}
+
+void GetName()
+{
+    NewLine();
     if( !IsAlpha(Look)) {
-        sprintf(tmp, "Name");
-        Expected(tmp);
+        Expected("Name");
     }
 
-    GetChar();
-
-    return uppercase(c);
+    char *p = Value;
+    while(IsAlNum(Look)) {
+        *p++ = uppercase(Look);
+        GetChar();
+    }
+    *p = '\0';
+    SkipWhite();
 }
 
 
 int GetNum()
 {
+    NewLine();
     int value = 0;
     if( !IsDigit(Look)) {
         sprintf(tmp, "Integer");
@@ -122,6 +182,8 @@ int GetNum()
         value = value * 10 + Look - '0';
         GetChar();
     }
+
+    SkipWhite();
 
     return value;
 }
@@ -143,6 +205,8 @@ void Init()
 
     InitTable();
     GetChar();
+    Scan();
+    SkipWhite();
 }
 
 void InitTable()
@@ -169,6 +233,25 @@ char *NewLabel()
 void PostLabel(char *label)
 {
     printf("%s:\n", label);
+}
+
+void SkipWhite()
+{
+    while (IsWhite(Look)) {
+        GetChar();
+    }
+}
+
+/* Skip over an End-of-Line */
+void NewLine()
+{
+    while(Look == '\n') {
+        GetChar();
+        if (Look == '\r') {
+            GetChar();
+        }
+        SkipWhite();
+    }
 }
 
 /* re-targetable routines */

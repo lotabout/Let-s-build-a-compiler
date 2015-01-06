@@ -49,7 +49,7 @@ void DoWhile();
 
 void Prog()
 {
-    Match('p');     /* handles program header part */
+    MatchString("PROGRAM");
     Header();
     TopDecls();
     Main();
@@ -76,17 +76,19 @@ void Epilog()
 
 void Main()
 {
-    Match('b');
+    MatchString("BEGIN");
     Prolog();
     Block();
-    Match('e');
+    MatchString("END");
     Epilog();
 }
 
 void TopDecls()
 {
-    while(Look != 'b') {
-        switch(Look) {
+    NewLine();
+    Scan();
+    while(Token != 'b') {
+        switch(Token) {
             case 'v':
                 Decl();
                 break;
@@ -95,18 +97,23 @@ void TopDecls()
                 Abort(tmp);
                 break;
         }
+        Scan();
+        NewLine();
     }
 }
 
 void Decl()
 {
+    NewLine();
     EmitLn(".section .data"); /* in case that the variable and function
                                  declarations are mixed */
-    Match('v');
-    Alloc(GetName());
+    GetName();
+    Alloc(Value[0]);
     while(Look == ',') {
-        GetChar();
-        Alloc(GetName());
+        Match(',');
+        GetName();
+        Alloc(Value[0]);
+        NewLine();
     }
 }
 
@@ -139,8 +146,10 @@ void Alloc(char name)
  * */
 void Block()
 {
-    while(strchr("el", Look) == NULL) {
-        switch (Look) {
+    Scan();
+    NewLine();
+    while(strchr("el", Token) == NULL) {
+        switch (Token) {
             case 'i':
                 DoIf();
                 break;
@@ -151,15 +160,18 @@ void Block()
                 Assignment();
                 break;
         }
+        Scan();
+        NewLine();
     }
 }
 
 void Assignment()
 {
-    char name = GetName();
+    char name[MAX_BUF];
+    sprintf(name, Value);
     Match('=');
     BoolExpression();
-    Store(name);
+    Store(name[0]);
 }
 
 void Factor()
@@ -169,7 +181,8 @@ void Factor()
         BoolExpression();
         Match(')');
     } else if (IsAlpha(Look)) {
-        LoadVar(GetName());
+        GetName();
+        LoadVar(Value[0]);
     } else {
         LoadConst(GetNum());
     }
@@ -218,6 +231,7 @@ void Divide()
 
 void Term1()
 {
+    NewLine();
     while(IsMulop(Look)) {
         Push();
         switch(Look) {
@@ -230,6 +244,7 @@ void Term1()
             default:
                 break;
         }
+        NewLine();
     }
 }
 
@@ -261,6 +276,7 @@ void Subtract()
 
 void Expression()
 {
+    NewLine();
     FirstTerm();
     while(IsAddop(Look)) {
         Push();
@@ -274,6 +290,7 @@ void Expression()
             default:
                 break;
         }
+        NewLine();
     }
 }
 
@@ -355,12 +372,14 @@ void NotFactor()
  * */
 void BoolTerm()
 {
+    NewLine();
     NotFactor();
     while(Look == '&') {
         Push();
         Match('&');
         NotFactor();
         PopAnd();
+        NewLine();
     }
 }
 
@@ -384,6 +403,7 @@ void BoolXor()
  * <bool_expression> ::= <bool_term> ( or_op <bool_term> )* */
 void BoolExpression()
 {
+    NewLine();
     BoolTerm();
     while(IsOrOp(Look)) {
         Push();
@@ -397,6 +417,7 @@ void BoolExpression()
             default:
                 break;
         }
+        NewLine();
     }
 }
 
@@ -407,24 +428,21 @@ void DoIf()
     char L2[MAX_BUF];
     sprintf(L1, NewLabel());
     sprintf(L2, L1);
-    Match('i');
     BoolExpression();
     BranchFalse(L1);
     Block();
-    if (Look == 'l') {
-        Match('l');
+    if (Token == 'l') {
         sprintf(L2, NewLabel());
         Branch(L2);
         PostLabel(L1);
         Block();
     }
     PostLabel(L2);
-    Match('e');
+    MatchString("ENDIF");
 }
 
 void DoWhile()
 {
-    Match('w');
     char L1[MAX_BUF];
     char L2[MAX_BUF];
     sprintf(L1, NewLabel());
@@ -433,7 +451,7 @@ void DoWhile()
     BoolExpression();
     BranchFalse(L2);
     Block();
-    Match('e');
+    MatchString("ENDWHILE");
     Branch(L1);
     PostLabel(L2);
 }

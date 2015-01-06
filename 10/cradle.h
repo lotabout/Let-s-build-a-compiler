@@ -5,6 +5,8 @@
 #define MAX_BUF 100
 extern char tmp[MAX_BUF];
 extern char ST[];
+extern char Token;
+extern char Value[MAX_BUF];
 char Look;
 
 void GetChar();
@@ -13,8 +15,7 @@ void Error(char *s);
 void Abort(char *s);
 void Expected(char *s);
 void Match(char x);
-
-void Newline();
+void MatchString(char *str);
 
 int IsAlpha(char c);
 int IsDigit(char c);
@@ -22,8 +23,10 @@ int IsAddop(char c);
 int IsMulop(char c);
 int IsOrOp(char c);
 int IsRelop(char c);
+int IsWhite(char c);
+int IsAlNum(char c);
 
-char GetName();
+void GetName();
 int GetNum();
 
 void Emit(char *s);
@@ -35,6 +38,9 @@ bool InTable(char name);
 
 char *NewLabel();
 void PostLabel(char *label);
+void SkipWhite();
+void NewLine();
+void Scan();
 
 /* re-targetable routines */
 void Clear();
@@ -59,6 +65,5 @@ void SetGreater();
 void SetLess();
 void Branch(char *label);
 void BranchFalse(char *label);
-
 
 #endif
