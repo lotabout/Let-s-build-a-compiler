@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define TABLE_SIZE 26
 static int LCount = 0;
@@ -82,6 +83,16 @@ int IsAddop(char c)
 int IsMulop(char c)
 {
     return (c == '*') || (c == '/');
+}
+
+int IsOrOp(char c)
+{
+    return strchr("|~", c) != NULL;
+}
+
+int IsRelop(char c)
+{
+    return strchr("=#<>", c) != NULL;
 }
 
 char GetName()
@@ -253,4 +264,66 @@ void Undefined(char *name)
 {
     sprintf(tmp, "Undefined Identifier: %s", name);
     Abort(tmp);
+}
+
+/* Complement the primary register */
+void NotIt()
+{
+    EmitLn("not %eax");
+}
+
+/* AND top of Stack with primary */
+void PopAnd()
+{
+    EmitLn("and (%esp), %eax");
+    EmitLn("addl $4, %esp");
+}
+
+/* OR top of Stack with primary */
+void PopOr()
+{
+    EmitLn("or (%esp), %eax");
+    EmitLn("addl $4, %esp");
+}
+
+/* XOR top of Stack with primary */
+void PopXor()
+{
+    EmitLn("xor (%esp), %eax");
+    EmitLn("addl $4, %esp");
+}
+
+/* Compare top of Stack with primary */
+void PopCompare()
+{
+    EmitLn("addl $4, %esp");
+    EmitLn("cmp -4(%esp), %eax");
+}
+
+/* set %eax if Compare was = */
+void SetEqual()
+{
+    EmitLn("sete %al");
+    EmitLn("movsx %al, %eax");
+}
+
+/* set %eax if Compare was != */
+void SetNEqual()
+{
+    EmitLn("setne %al");
+    EmitLn("movsx %al, %eax");
+}
+
+/* set %eax if Compare was > */
+void SetGreater()
+{
+    EmitLn("setl %al");
+    EmitLn("movsx %al, %eax");
+}
+
+/* set %eax if Compare was < */
+void SetLess()
+{
+    EmitLn("setg %al");
+    EmitLn("movsx %al, %eax");
 }

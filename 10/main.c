@@ -34,6 +34,16 @@ void Divide();
 void Multiply();
 void FirstFactor();
 void Add();
+void Equals();
+void NotEquals();
+void Less();
+void Greater();
+void Relation();
+void NotFactor();
+void BoolTerm();
+void BoolOr();
+void BoolXor();
+void BoolExpression();
 
 void Prog()
 {
@@ -132,7 +142,7 @@ void Assignment()
 {
     char name = GetName();
     Match('=');
-    Expression();
+    BoolExpression();
     Store(name);
 }
 
@@ -140,7 +150,7 @@ void Factor()
 {
     if (Look == '(') {
         Match('(');
-        Expression();
+        BoolExpression();
         Match(')');
     } else if (IsAlpha(Look)) {
         LoadVar(GetName());
@@ -250,6 +260,131 @@ void Expression()
         }
     }
 }
+
+/* Recognize and Translate a Relational "Equals" */
+void Equals()
+{
+    Match('=');
+    Expression();
+    PopCompare();
+    SetEqual();
+}
+
+/* Recognize and Translate a Relational "Not Equals" */
+void NotEquals()
+{
+    Match('#');
+    Expression();
+    PopCompare();
+    SetNEqual();
+}
+
+/* Recognize and Translate a Relational "Less Than" */
+void Less()
+{
+    Match('<');
+    Expression();
+    PopCompare();
+    SetLess();
+}
+
+/* Recognize and Translate a Relational "Greater Than" */
+void Greater()
+{
+    Match('>');
+    Expression();
+    PopCompare();
+    SetGreater();
+}
+
+/* Parse and Translate a Relation */
+void Relation()
+{
+    Expression();
+    if (IsRelop(Look)) {
+        Push();
+        switch (Look) {
+            case '=':
+                Equals();
+                break;
+            case '#':
+                NotEquals();
+                break;
+            case '<':
+                Less();
+                break;
+            case '>':
+                Greater();
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+/* Parse and Translate a Boolean Factor with Leading NOT */
+void NotFactor()
+{
+    if (Look == '!') {
+        Match('!');
+        Relation();
+        NotIt();
+    } else {
+        Relation();
+    }
+}
+
+/* Parse and Translate a Boolean Term 
+ * <bool_term> ::= <not_factor> ( and_op <not_factor )*
+ * */
+void BoolTerm()
+{
+    NotFactor();
+    while(Look == '&') {
+        Push();
+        Match('&');
+        NotFactor();
+        PopAnd();
+    }
+}
+
+/* Recognize and Translate a Boolean OR */
+void BoolOr()
+{
+    Match('|');
+    BoolTerm();
+    PopOr();
+}
+
+/* Recognize and Translate a Boolean XOR */
+void BoolXor()
+{
+    Match('~');
+    BoolTerm();
+    PopXor();
+}
+
+/* Parse and Translate a Boolean Expression 
+ * <bool_expression> ::= <bool_term> ( or_op <bool_term> )* */
+void BoolExpression()
+{
+    BoolTerm();
+    while(IsOrOp(Look)) {
+        Push();
+        switch(Look) {
+            case '|':
+                BoolOr();
+                break;
+            case '~':
+                BoolXor();
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+
 
 int main()
 {

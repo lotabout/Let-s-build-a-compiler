@@ -20,6 +20,8 @@ int IsAlpha(char c);
 int IsDigit(char c);
 int IsAddop(char c);
 int IsMulop(char c);
+int IsOrOp(char c);
+int IsRelop(char c);
 
 char GetName();
 int GetNum();
@@ -46,6 +48,15 @@ void PopMul();
 void PopDiv();
 void Store(char name);
 void Undefined(char *name);
+void NotIt();
+void PopAnd();
+void PopOr();
+void PopXor();
+void PopCompare();
+void SetEqual();
+void SetNEqual();
+void SetGreater();
+void SetLess();
 
 
 #endif
