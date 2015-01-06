@@ -44,6 +44,8 @@ void BoolTerm();
 void BoolOr();
 void BoolXor();
 void BoolExpression();
+void DoIf();
+void DoWhile();
 
 void Prog()
 {
@@ -131,10 +133,24 @@ void Alloc(char name)
     }
 }
 
+/* Parse and Translate a Block of Statements 
+ * <block> ::= ( <statement> )*
+ * <statement> ::= <if> | <while> | <assignment>
+ * */
 void Block()
 {
-    while(strchr("e", Look) == NULL) {
-        Assignment();
+    while(strchr("el", Look) == NULL) {
+        switch (Look) {
+            case 'i':
+                DoIf();
+                break;
+            case 'w':
+                DoWhile();
+                break;
+            default:
+                Assignment();
+                break;
+        }
     }
 }
 
@@ -384,6 +400,43 @@ void BoolExpression()
     }
 }
 
+/* Recognize and Translate an IF construct */
+void DoIf()
+{
+    char L1[MAX_BUF];
+    char L2[MAX_BUF];
+    sprintf(L1, NewLabel());
+    sprintf(L2, L1);
+    Match('i');
+    BoolExpression();
+    BranchFalse(L1);
+    Block();
+    if (Look == 'l') {
+        Match('l');
+        sprintf(L2, NewLabel());
+        Branch(L2);
+        PostLabel(L1);
+        Block();
+    }
+    PostLabel(L2);
+    Match('e');
+}
+
+void DoWhile()
+{
+    Match('w');
+    char L1[MAX_BUF];
+    char L2[MAX_BUF];
+    sprintf(L1, NewLabel());
+    sprintf(L2, NewLabel());
+    PostLabel(L1);
+    BoolExpression();
+    BranchFalse(L2);
+    Block();
+    Match('e');
+    Branch(L1);
+    PostLabel(L2);
+}
 
 
 int main()

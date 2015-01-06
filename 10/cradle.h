@@ -57,6 +57,8 @@ void SetEqual();
 void SetNEqual();
 void SetGreater();
 void SetLess();
+void Branch(char *label);
+void BranchFalse(char *label);
 
 
 #endif

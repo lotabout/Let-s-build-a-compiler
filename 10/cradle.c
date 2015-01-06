@@ -327,3 +327,18 @@ void SetLess()
     EmitLn("setg %al");
     EmitLn("movsx %al, %eax");
 }
+
+/* Branch unconditional */
+void Branch(char *label)
+{
+    sprintf(tmp, "jmp %s", label);
+    EmitLn(tmp);
+}
+
+/* Branch False */
+void BranchFalse(char *label)
+{
+    EmitLn("test $1, %eax");
+    sprintf(tmp, "jz %s", label);
+    EmitLn(tmp);
+}
