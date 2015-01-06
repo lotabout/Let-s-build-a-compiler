@@ -4,13 +4,19 @@
 #include <string.h>
 
 #include "cradle.h"
+#include <malloc.h>
 
-#define TABLE_SIZE 26
+#define MaxEntry 100
+#define MAX_SYMBOL_LENGTH 10
 static int LCount = 0;
 static char labelName[MAX_BUF];
 char tmp[MAX_BUF];
 
-char ST[TABLE_SIZE];
+/*char ST[TABLE_SIZE];*/
+static int NEntry = 0;
+const char *ST[MaxEntry];
+char SType[MaxEntry];
+
 
 /* Keywords symbol table */
 const char const *KWList[] = {
@@ -58,9 +64,31 @@ int Lookup(const char const *table[], const char *string, int n)
     return found ? i : -1;
 }
 
+/* Add a new entry to symbol table */
+void AddEntry(char *symbol, char type)
+{
+    if (InTable(symbol)) {
+        sprintf(tmp, "Duplicate Identifier %s", symbol);
+        Abort(tmp);
+    }
+    if (NEntry == MaxEntry) {
+        Abort("Symbol Table Full");
+    }
+
+    char *new_entry = (char *)malloc((strlen(symbol)+1)*sizeof(*new_entry));
+    if (new_entry == NULL) {
+        Abort("AddEntry: not enough memory allocating new_entry.");
+    }
+    strcpy(new_entry, symbol);
+    ST[NEntry] = new_entry;
+    SType[NEntry] = type;
+
+    NEntry++;
+}
+
 /* Get an Identifier and Scan it for keywords */
 void Scan()
-{ 
+{
     GetName();
     int index = Lookup(KWList, Value, KWNum);
     Token = KWCode[index+1];
@@ -74,7 +102,7 @@ void MatchString(char *str)
     }
 }
 
-void GetChar() 
+void GetChar()
 {
     Look = getchar();
     /* printf("Getchar: %c\n", Look); */
@@ -115,7 +143,7 @@ void Match(char x)
 int IsAlpha(char c)
 {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-} 
+}
 
 int IsDigit(char c)
 {
@@ -212,15 +240,16 @@ void Init()
 void InitTable()
 {
     int i;
-    for (i = 0; i < TABLE_SIZE; i++) {
-        ST[i] = ' ';
+    for (i = 0; i < MaxEntry; i++) {
+        ST[i] = NULL;
+        SType[i] = ' ';
     }
 
 }
 
-bool InTable(char name)
+bool InTable(char *name)
 {
-    return ST[name - 'A'] != ' ';
+    return Lookup(ST, name, NEntry) != -1;
 }
 
 char *NewLabel()
@@ -272,15 +301,13 @@ void LoadConst(int n)
 }
 
 /* Load a variable to primary register */
-void LoadVar(char name)
+void LoadVar(char *name)
 {
     if (!InTable(name)) {
         char name_string[MAX_BUF];
-        name_string[0] = name;
-        name_string[1] = '\0';
         Undefined(name_string);
     }
-    sprintf(tmp, "movl %c, %%eax", name);
+    sprintf(tmp, "movl %s, %%eax", name);
     EmitLn(tmp);
 }
 
@@ -331,15 +358,13 @@ void PopDiv()
 }
 
 /* store primary to variable */
-void Store(char name)
+void Store(char *name)
 {
     if (!InTable(name)) {
         char name_string[MAX_BUF];
-        name_string[0] = name;
-        name_string[1] = '\0';
         Undefined(name_string);
     }
-    sprintf(tmp, "movl %%eax, %c", name);
+    sprintf(tmp, "movl %%eax, %s", name);
     EmitLn(tmp);
 }
 

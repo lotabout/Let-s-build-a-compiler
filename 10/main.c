@@ -19,7 +19,7 @@ void Header();
 void Main();
 void Decl();
 void TopDecls();
-void Alloc(char);
+void Alloc(char *);
 void Block();
 void Assignment();
 
@@ -108,23 +108,23 @@ void Decl()
     EmitLn(".section .data"); /* in case that the variable and function
                                  declarations are mixed */
     GetName();
-    Alloc(Value[0]);
+    Alloc(Value);
     while(Look == ',') {
         Match(',');
         GetName();
-        Alloc(Value[0]);
+        Alloc(Value);
         NewLine();
     }
 }
 
-void Alloc(char name)
+void Alloc(char *name)
 {
     if (InTable(name)) {
-        sprintf(tmp, "Duplicate Variable Name: %c", name);
+        sprintf(tmp, "Duplicate Variable Name: %s", name);
         Abort(tmp);
     }
-    ST[name - 'A'] = 'v';
-    sprintf(tmp, "%c: .int ", name);
+    AddEntry(name, 'v');
+    sprintf(tmp, "%s: .int ", name);
     Emit(tmp);
     if (Look == '=') {
         Match('=');
@@ -171,7 +171,7 @@ void Assignment()
     sprintf(name, Value);
     Match('=');
     BoolExpression();
-    Store(name[0]);
+    Store(name);
 }
 
 void Factor()
@@ -182,7 +182,7 @@ void Factor()
         Match(')');
     } else if (IsAlpha(Look)) {
         GetName();
-        LoadVar(Value[0]);
+        LoadVar(Value);
     } else {
         LoadConst(GetNum());
     }

@@ -3,8 +3,10 @@
 #include <stdbool.h>
 
 #define MAX_BUF 100
+#define MaxEntry 100
 extern char tmp[MAX_BUF];
-extern char ST[];
+extern const char *ST[];
+extern char SType[];
 extern char Token;
 extern char Value[MAX_BUF];
 char Look;
@@ -34,7 +36,8 @@ void EmitLn(char *s);
 
 void Init();
 void InitTable();
-bool InTable(char name);
+bool InTable(char *name);
+void AddEntry(char *symbol, char type);
 
 char *NewLabel();
 void PostLabel(char *label);
@@ -46,13 +49,13 @@ void Scan();
 void Clear();
 void Negate();
 void LoadConst(int n);
-void LoadVar(char name);
+void LoadVar(char *name);
 void Push();
 void PopAdd();
 void PopSub();
 void PopMul();
 void PopDiv();
-void Store(char name);
+void Store(char *name);
 void Undefined(char *name);
 void NotIt();
 void PopAnd();
