@@ -1,0 +1,15 @@
+ba
+wb
+lc
+B 
+a=a
+a=b
+a=c
+b=a
+b=b
+b=c
+c=a
+c=b
+c=c
+.
+
