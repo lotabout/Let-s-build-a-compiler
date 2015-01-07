@@ -47,6 +47,7 @@ void AddEntry(char *symbol, char type);
 char *NewLabel();
 void PostLabel(char *label);
 void SkipWhite();
+void SkipComment();
 void NewLine();
 void Scan();
 

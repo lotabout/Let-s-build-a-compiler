@@ -110,7 +110,6 @@ void GetChar()
     /* printf("Getchar: %c\n", Look); */
 }
 
-
 void Error(char *s)
 {
     printf("\nError: %s.", s);
@@ -174,7 +173,7 @@ int IsRelop(char c)
 
 int IsWhite(char c)
 {
-    return strchr(" \t\r\n", c) != NULL;
+    return strchr(" \t\r\n{", c) != NULL;
 }
 
 int IsAlNum(char c)
@@ -304,8 +303,23 @@ void PostLabel(char *label)
 void SkipWhite()
 {
     while (IsWhite(Look)) {
-        GetChar();
+        if (Look == '{') {
+            SkipComment();
+        } else {
+            GetChar();
+        }
     }
+}
+
+void SkipComment()
+{
+    while(Look != '}') {
+        GetChar();
+        if (Look == '{') {
+            SkipComment();
+        }
+    }
+    GetChar();
 }
 
 /* Skip over an End-of-Line */
