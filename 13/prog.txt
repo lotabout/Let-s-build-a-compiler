@@ -1,14 +1,14 @@
 vx
 vy
-pmb
+pm(a,b,c)b
 x=y
 y=x
 e
-pnb
+pn()b
 y=x
 x = y
 e
 Ptb
 x = x
-m
+m(a,b,c)
 e.

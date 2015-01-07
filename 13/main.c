@@ -15,6 +15,11 @@ void DoProc(void);
 void DoMain(void);
 void Return();
 void CallProc(char name);
+void Call(char name);
+void FormalList();
+void FormalParam();
+void Param();
+void ParamList();
 
 void Header();
 void Prolog();
@@ -67,8 +72,14 @@ void DoBlock()
     }
 }
 
-/* call a procedure */
 void CallProc(char name)
+{
+    ParamList();
+    Call(name);
+}
+
+/* call a procedure */
+void Call(char name)
 {
     char tmp_buf[MAX_BUF];
     sprintf(tmp_buf, "call %c", name);
@@ -149,6 +160,7 @@ void DoProc(void)
 {
     Match('p');
     char name = GetName();
+    FormalList();
     Fin();
     if (InTable(name)) {
         Duplicate(name);
@@ -177,6 +189,46 @@ void DoMain(void)
     }
     Prolog();
     BeginBlock();
+}
+
+/* process the formal parameter list of a procedure */
+void FormalList()
+{
+    Match('(');
+    if (Look != ')') {
+        FormalParam();
+        while(Look == ',') {
+            Match(',');
+            FormalParam();
+        }
+    }
+    Match(')');
+}
+
+/* process a formal parameter */
+void FormalParam()
+{
+    GetName();
+}
+
+/* process an actual parameter */
+void Param()
+{
+    GetName();
+}
+
+/* process the parameter list for a procedure call */
+void ParamList()
+{
+    Match('(');
+    if (Look != ')') {
+        Param();
+        while(Look == ',') {
+            Match(',');
+            Param();
+        }
+    }
+    Match(')');
 }
 
 int main(int argc, char *argv[])
