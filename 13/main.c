@@ -4,7 +4,8 @@
 #include "cradle.h"
 
 void Expression();
-void Assignment();
+void AssignOrProc();
+void Assignment(char name);
 void DoBlock();
 void BeginBlock();
 void Alloc(char name);
@@ -13,6 +14,7 @@ void TopDecls(void);
 void DoProc(void);
 void DoMain(void);
 void Return();
+void CallProc(char name);
 
 void Header();
 void Prolog();
@@ -26,10 +28,31 @@ void Expression()
     LoadVar(GetName());
 }
 
-/* parse and tranlate an assignment statement */
-void Assignment()
+/* decide if a statement is an assignment or procedure call */
+void AssignOrProc()
 {
     char name = GetName();
+    char tmp_buf[MAX_BUF];
+    switch (TypeOf(name)) {
+        case ' ':
+            Undefined(name);
+            break;
+        case 'v':
+            Assignment(name);
+            break;
+        case 'p':
+            CallProc(name);
+            break;
+        default:
+            sprintf(tmp_buf, "Identifier %c cannot be used here", name);
+            Abort(tmp_buf);
+            break;
+    }
+}
+
+/* parse and tranlate an assignment statement */
+void Assignment(char name)
+{
     Match('=');
     Expression();
     StoreVar(name);
@@ -39,16 +62,17 @@ void Assignment()
 void DoBlock()
 {
     while(strchr("e", Look) == NULL) {
-        switch(Look) {
-            case 'p':
-                DoProc();
-                break;
-            default:
-                Assignment();
-                break;
-        }
+        AssignOrProc();
         Fin();
     }
+}
+
+/* call a procedure */
+void CallProc(char name)
+{
+    char tmp_buf[MAX_BUF];
+    sprintf(tmp_buf, "call %c", name);
+    EmitLn(tmp_buf);
 }
 
 /* parse and translate a Begin-Block */
