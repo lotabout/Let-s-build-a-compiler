@@ -3,7 +3,8 @@ vy
 vz
 pm(a,b,c)b
 x=a
+b=x
 e
 Ptb
-m(z,z,z)
+m(z,y,z)
 e.

@@ -228,8 +228,10 @@ void FormalParam()
 /* process an actual parameter */
 void Param()
 {
-    Expression();
-    Push();
+    char tmp_buf[MAX_BUF];
+    sprintf(tmp_buf, "lea %c, %%ebx", GetName());
+    EmitLn(tmp_buf);
+    EmitLn("pushl %ebx");
 }
 
 /* process the parameter list for a procedure call */
