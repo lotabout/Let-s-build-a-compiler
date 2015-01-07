@@ -1,8 +1,8 @@
 PROGRAM;
-{ 
+/* 
     calculate 1+2+...+10 
-    {nested comment} 
-}
+    /* nested comment */
+*/
 VAR xx, yy=1, zz=10;
 BEGIN
   WHILE yy <= zz

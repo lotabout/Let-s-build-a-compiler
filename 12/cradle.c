@@ -11,6 +11,7 @@
 static int LCount = 0;
 static char labelName[MAX_BUF];
 char tmp[MAX_BUF];
+char TempChar;
 
 /*char ST[TABLE_SIZE];*/
 static int NEntry = 0;
@@ -104,10 +105,27 @@ void MatchString(char *str)
     Next();
 }
 
-void GetChar()
+void GetCharX()
 {
     Look = getchar();
     /* printf("Getchar: %c\n", Look); */
+}
+
+void GetChar()
+{
+    if (TempChar != ' ') {
+        Look = TempChar;
+        TempChar = ' ';
+    } else {
+        GetCharX();
+        if (Look == '/') {
+            TempChar = getchar();
+            if (TempChar == '*') {
+                Look = '{';
+                TempChar = ' ';
+            }
+        }
+    }
 }
 
 void Error(char *s)
@@ -313,12 +331,15 @@ void SkipWhite()
 
 void SkipComment()
 {
-    while(Look != '}') {
-        GetChar();
-        if (Look == '{') {
-            SkipComment();
-        }
-    }
+    do {
+        do {
+            GetChar();
+            if (Look == '{') {
+                SkipComment();
+            }
+        } while(Look != '*');
+        GetCharX();
+    } while(Look != '/');
     GetChar();
 }
 
