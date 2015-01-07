@@ -19,7 +19,7 @@ void Call(char name);
 void FormalList();
 void FormalParam();
 void Param();
-void ParamList();
+int ParamList();
 
 void Header();
 void Prolog();
@@ -30,7 +30,12 @@ void Epilog();
  * vestigial version */
 void Expression()
 {
-    LoadVar(GetName());
+    char name = GetName();
+    if (IsParam(name)) {
+        LoadParam(ParamNumber(name));
+    } else {
+        LoadVar(name);
+    }
 }
 
 /* decide if a statement is an assignment or procedure call */
@@ -43,6 +48,7 @@ void AssignOrProc()
             Undefined(name);
             break;
         case 'v':
+        case 'f':
             Assignment(name);
             break;
         case 'p':
@@ -60,7 +66,11 @@ void Assignment(char name)
 {
     Match('=');
     Expression();
-    StoreVar(name);
+    if (IsParam(name)) {
+        StoreParam(ParamNumber(name));
+    } else {
+        StoreVar(name);
+    }
 }
 
 /* parse and translate a block of statement */
@@ -74,8 +84,9 @@ void DoBlock()
 
 void CallProc(char name)
 {
-    ParamList();
+    int bytes_pushed = ParamList();
     Call(name);
+    CleanStack(bytes_pushed);
 }
 
 /* call a procedure */
@@ -169,6 +180,7 @@ void DoProc(void)
     PostLabel(name);
     BeginBlock();
     Return();
+    ClearParams();
 }
 
 void Return()
@@ -208,27 +220,32 @@ void FormalList()
 /* process a formal parameter */
 void FormalParam()
 {
-    GetName();
+    AddParam(GetName());
 }
 
 /* process an actual parameter */
 void Param()
 {
-    GetName();
+    Expression();
+    Push();
 }
 
 /* process the parameter list for a procedure call */
-void ParamList()
+int ParamList()
 {
+    int num_params = 0;
     Match('(');
     if (Look != ')') {
         Param();
+        num_params++;
         while(Look == ',') {
             Match(',');
             Param();
+            num_params++;
         }
     }
     Match(')');
+    return 4*num_params;
 }
 
 int main(int argc, char *argv[])

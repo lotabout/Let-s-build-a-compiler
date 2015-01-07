@@ -10,6 +10,8 @@ extern const char LF;
 
 extern char Look;   /* lookahead character */
 extern char ST[];   /* symbol table */
+extern int Params[];    /* parameter table */
+extern int NumParams;
 
 /* read new character from input stream */
 void GetChar();
@@ -79,8 +81,32 @@ void LoadVar(char name);
 /* store the primary register */
 void StoreVar(char name);
 
+/* load a parameter to the primary register */
+void LoadParam(int n);
+
+/* store a parameter from the primary register */
+void StoreParam(int n);
+
+/* push the primary register to the stack */
+void Push();
+
+/* Adjust the stack pointer upwards by n bytes */
+void CleanStack(int bytes);
+
 /* initialize the symbol table */
 void InitTable(void);
+
+/* initialize parameter table to NULL */
+void ClearParams();
+
+/* find the parameter number */
+int ParamNumber(char name);
+
+/* see if an identifier is a parameter */
+bool IsParam(char name);
+
+/* Add a new parameter to table */
+void AddParam(char name);
 
 /* initialize */
 void Init(void);

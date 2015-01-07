@@ -14,6 +14,8 @@ char tmp[MAX_BUF];  /* temporary buffer */
 
 char Look;
 char ST[MaxEntry];   /* symbol table */
+int Params[MaxEntry];    /* parameter table */
+int NumParams = 0;
 
 /* read new character from input stream */
 void GetChar()
@@ -59,7 +61,11 @@ void Duplicate(char symbol)
 /* Get type of symbole */
 char TypeOf(char symbol)
 {
-    return ST[symbol - 'A'];
+    if (IsParam(symbol)) {
+        return 'f';
+    } else {
+        return ST[symbol - 'A'];
+    }
 }
 
 /* check if a symbol is in table */
@@ -225,6 +231,37 @@ void StoreVar(char name)
     EmitLn(tmp);
 }
 
+/* load a parameter to the primary register */
+void LoadParam(int n)
+{
+    int offset = 4 + 4*(NumParams - n);
+    sprintf(tmp, "movl %d(%%esp), %%eax", offset);
+    EmitLn(tmp);
+}
+
+/* store a parameter from the primary register */
+void StoreParam(int n)
+{
+    int offset = 4 + 4*(NumParams - n);
+    sprintf(tmp, "movl %%eax, %d(%%esp)", offset);
+    EmitLn(tmp);
+}
+
+/* push the primary register to the stack */
+void Push()
+{
+    EmitLn("push %eax");
+}
+
+/* Adjust the stack pointer upwards by n bytes */
+void CleanStack(int bytes)
+{
+    if (bytes > 0) {
+        sprintf(tmp, "addl $%d, %%esp", bytes);
+        EmitLn(tmp);
+    }
+}
+
 /* initialize the symbol table */
 void InitTable(void)
 {
@@ -234,10 +271,43 @@ void InitTable(void)
     }
 }
 
+/* initialize parameter table to NULL */
+void ClearParams()
+{
+    int i;
+    for (i = 0; i < MaxEntry; ++i) {
+        Params[i] = 0;
+    }
+    NumParams = 0;
+}
+
+/* find the parameter number */
+int ParamNumber(char name)
+{
+    return Params[name - 'A'];
+}
+
+/* see if an identifier is a parameter */
+bool IsParam(char name)
+{
+    return Params[name-'A'] != 0;
+}
+
+/* Add a new parameter to table */
+void AddParam(char name)
+{
+    if (IsParam(name)) {
+        Duplicate(name);
+    }
+    NumParams++;
+    Params[name - 'A'] = NumParams;
+}
+
 /* initialize */
 void Init()
 {
     GetChar();
     SkipWhite();
     InitTable();
+    ClearParams();
 }

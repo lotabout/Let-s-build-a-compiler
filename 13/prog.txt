@@ -1,14 +1,9 @@
 vx
 vy
+vz
 pm(a,b,c)b
-x=y
-y=x
-e
-pn()b
-y=x
-x = y
+x=a
 e
 Ptb
-x = x
-m(a,b,c)
+m(z,z,z)
 e.
