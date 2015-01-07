@@ -16,6 +16,7 @@ char Look;
 char ST[MaxEntry];   /* symbol table */
 int Params[MaxEntry];    /* parameter table */
 int NumParams = 0;
+int Base;
 
 /* read new character from input stream */
 void GetChar()
@@ -234,19 +235,17 @@ void StoreVar(char name)
 /* load a parameter to the primary register */
 void LoadParam(int n)
 {
-    int offset = 8 + 4*(NumParams - n);
-    sprintf(tmp, "movl %d(%%ebp), %%ebx", offset);
+    int offset = 8 + 4*(Base - n);
+    sprintf(tmp, "movl %d(%%ebp), %%eax", offset);
     EmitLn(tmp);
-    EmitLn("movl (%ebx), %eax");
 }
 
 /* store a parameter from the primary register */
 void StoreParam(int n)
 {
-    int offset = 8 + 4*(NumParams - n);
-    sprintf(tmp, "movl %d(%%ebp), %%ebx", offset);
+    int offset = 8 + 4*(Base - n);
+    sprintf(tmp, "movl %%eax, %d(%%ebp)", offset);
     EmitLn(tmp);
-    EmitLn("movl %eax, (%ebx)");
 }
 
 /* push the primary register to the stack */

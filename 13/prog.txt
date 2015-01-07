@@ -1,10 +1,12 @@
 vx
 vy
 vz
-pm(a,b,c)b
-x=a
-b=x
+pm(a,b,c)
+vt
+b
+t=a
+x=t
 e
 Ptb
-m(z,y,z)
+m(z,z,z)
 e.

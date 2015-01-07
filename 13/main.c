@@ -3,6 +3,7 @@
 
 #include "cradle.h"
 
+
 void Expression();
 void AssignOrProc();
 void Assignment(char name);
@@ -20,13 +21,16 @@ void FormalList();
 void FormalParam();
 void Param();
 int ParamList();
+void LocDecl();
+int LocDecls();
 
 void Header();
 void Prolog();
 void Epilog();
 
-void ProcProlog(char name);
+void ProcProlog(char name, int num_local_params);
 void ProcEpilog();
+
 
 /* parse and tranlate an expression
  * vestigial version */
@@ -173,13 +177,14 @@ void DoProc(void)
 {
     Match('p');
     char name = GetName();
-    FormalList();
     Fin();
     if (InTable(name)) {
         Duplicate(name);
     }
     ST[name-'A'] = 'p';
-    ProcProlog(name);
+    FormalList();
+    int num_local_params = LocDecls();
+    ProcProlog(name, num_local_params);
     BeginBlock();
     ProcEpilog();
     ClearParams();
@@ -217,6 +222,9 @@ void FormalList()
         }
     }
     Match(')');
+    Fin();
+    Base = NumParams;
+    NumParams = NumParams + 1;
 }
 
 /* process a formal parameter */
@@ -228,10 +236,8 @@ void FormalParam()
 /* process an actual parameter */
 void Param()
 {
-    char tmp_buf[MAX_BUF];
-    sprintf(tmp_buf, "lea %c, %%ebx", GetName());
-    EmitLn(tmp_buf);
-    EmitLn("pushl %ebx");
+    Expression();
+    Push();
 }
 
 /* process the parameter list for a procedure call */
@@ -253,11 +259,14 @@ int ParamList()
 }
 
 /* write the prolog for a procedure */
-void ProcProlog(char name)
+void ProcProlog(char name, int num_local_params)
 {
+    char tmp_buf[MAX_BUF];
     PostLabel(name);
     EmitLn("pushl %ebp");
     EmitLn("movl %esp, %ebp");
+    sprintf(tmp_buf, "subl $%d, %%esp", 4*num_local_params);
+    EmitLn(tmp_buf);
 }
 
 /* write the epilog for a procedure */
@@ -268,6 +277,24 @@ void ProcEpilog()
     EmitLn("ret");
 }
 
+/* parse and translate a local data declaration */
+void LocDecl()
+{
+    Match('v');
+    AddParam(GetName());
+    Fin();
+}
+
+/* parse and translate local declarations */
+int LocDecls()
+{
+    int num_params = 0;
+    while(Look == 'v') {
+        LocDecl();
+        num_params ++;
+    }
+    return num_params;
+}
 
 int main(int argc, char *argv[])
 {

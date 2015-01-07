@@ -12,6 +12,7 @@ extern char Look;   /* lookahead character */
 extern char ST[];   /* symbol table */
 extern int Params[];    /* parameter table */
 extern int NumParams;
+extern int Base;
 
 /* read new character from input stream */
 void GetChar();
