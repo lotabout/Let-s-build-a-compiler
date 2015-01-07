@@ -25,6 +25,8 @@ void Header();
 void Prolog();
 void Epilog();
 
+void ProcProlog(char name);
+void ProcEpilog();
 
 /* parse and tranlate an expression
  * vestigial version */
@@ -177,9 +179,9 @@ void DoProc(void)
         Duplicate(name);
     }
     ST[name-'A'] = 'p';
-    PostLabel(name);
+    ProcProlog(name);
     BeginBlock();
-    Return();
+    ProcEpilog();
     ClearParams();
 }
 
@@ -247,6 +249,23 @@ int ParamList()
     Match(')');
     return 4*num_params;
 }
+
+/* write the prolog for a procedure */
+void ProcProlog(char name)
+{
+    PostLabel(name);
+    EmitLn("pushl %ebp");
+    EmitLn("movl %esp, %ebp");
+}
+
+/* write the epilog for a procedure */
+void ProcEpilog()
+{
+    EmitLn("movl %ebp, %esp");
+    EmitLn("popl %ebp");
+    EmitLn("ret");
+}
+
 
 int main(int argc, char *argv[])
 {

@@ -234,16 +234,16 @@ void StoreVar(char name)
 /* load a parameter to the primary register */
 void LoadParam(int n)
 {
-    int offset = 4 + 4*(NumParams - n);
-    sprintf(tmp, "movl %d(%%esp), %%eax", offset);
+    int offset = 8 + 4*(NumParams - n);
+    sprintf(tmp, "movl %d(%%ebp), %%eax", offset);
     EmitLn(tmp);
 }
 
 /* store a parameter from the primary register */
 void StoreParam(int n)
 {
-    int offset = 4 + 4*(NumParams - n);
-    sprintf(tmp, "movl %%eax, %d(%%esp)", offset);
+    int offset = 8 + 4*(NumParams - n);
+    sprintf(tmp, "movl %%eax, %d(%%ebp)", offset);
     EmitLn(tmp);
 }
 
