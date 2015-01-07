@@ -10,10 +10,14 @@ void BeginBlock();
 void Alloc(char name);
 void Decl(void);
 void TopDecls(void);
+void DoProc(void);
+void DoMain(void);
+void Return();
 
 void Header();
 void Prolog();
 void Epilog();
+
 
 /* parse and tranlate an expression
  * vestigial version */
@@ -35,7 +39,14 @@ void Assignment()
 void DoBlock()
 {
     while(strchr("e", Look) == NULL) {
-        Assignment();
+        switch(Look) {
+            case 'p':
+                DoProc();
+                break;
+            default:
+                Assignment();
+                break;
+        }
         Fin();
     }
 }
@@ -54,10 +65,7 @@ void BeginBlock()
 void Alloc(char name)
 {
     if (InTable(name)) {
-        char tmp_buf[MAX_BUF];
-        tmp_buf[0] = name;
-        tmp_buf[1] = '\0';
-        Duplicate(tmp_buf);
+        Duplicate(name);
     }
     ST[name-'A'] = 'v';
     printf("\t%c : .int 0\n", name);
@@ -66,6 +74,7 @@ void Alloc(char name)
 /* parse and translate a data declaration */
 void Decl(void)
 {
+    printf(".section .data\n");
     Match('v');
     Alloc(GetName());
 }
@@ -73,12 +82,17 @@ void Decl(void)
 /* parse and translate global declarations */
 void TopDecls(void)
 {
-    printf(".section .data\n");
     char tmp_buf[MAX_BUF];
-    while(Look != 'b') {
+    while(Look != '.') {
         switch(Look) {
             case 'v':
                 Decl();
+                break;
+            case 'p':
+                DoProc();
+                break;
+            case 'P':
+                DoMain();
                 break;
             default:
                 sprintf(tmp_buf, "Unrecognized keyword %c", Look);
@@ -107,13 +121,45 @@ void Epilog()
     EmitLn("int $0x80");
 }
 
+void DoProc(void)
+{
+    Match('p');
+    char name = GetName();
+    Fin();
+    if (InTable(name)) {
+        Duplicate(name);
+    }
+    ST[name-'A'] = 'p';
+    PostLabel(name);
+    BeginBlock();
+    Return();
+}
+
+void Return()
+{
+    EmitLn("ret");
+}
+
+/* parse and translate a main program 
+ * <main program> ::= PROGRAM <ident> <begin-block>
+ * */
+void DoMain(void)
+{
+    Match('P');
+    char name = GetName();
+    Fin();
+    if (InTable(name)) {
+        Duplicate(name);
+    }
+    Prolog();
+    BeginBlock();
+}
+
 int main(int argc, char *argv[])
 {
     Init();
     Header();
     TopDecls();
-    Prolog();
-    BeginBlock();
     Epilog();
     return 0;
 }

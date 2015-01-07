@@ -24,10 +24,10 @@ void Abort(char *str);
 void Expected(char *str);
 
 /* report an undefined identifier */
-void Undefined(char *str);
+void Undefined(char symbol);
 
 /* report an duplicate identifier */
-void Duplicate(char *str);
+void Duplicate(char symbol);
 
 /* Get type of symbole */
 char TypeOf(char symbol);
@@ -71,7 +71,7 @@ void EmitLn(char *str);
 
 
 /* Post a label to output */
-void PostLabel(char *label);
+void PostLabel(char label);
 
 /* Load a variable to the primary register */
 void LoadVar(char name);

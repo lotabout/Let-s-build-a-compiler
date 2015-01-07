@@ -1,7 +1,13 @@
-va
-vb
-vc
-b
-a=b
-b=c
+vx
+vy
+pmb
+x=y
+y=x
+e
+pnb
+y=x
+x = y
+e
+Ptb
+x = x
 e.

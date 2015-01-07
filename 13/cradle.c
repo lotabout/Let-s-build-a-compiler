@@ -43,16 +43,16 @@ void Expected(char *str)
 }
 
 /* report an undefined identifier */
-void Undefined(char *str)
+void Undefined(char symbol)
 {
-    sprintf(tmp, "Undefined Identifier: %s", str);
+    sprintf(tmp, "Undefined Identifier: %c", symbol);
     Abort(tmp);
 }
 
 /* report an duplicate identifier */
-void Duplicate(char *str)
+void Duplicate(char symbol)
 {
-    sprintf(tmp, "Duplicate Identifier: %s", str);
+    sprintf(tmp, "Duplicate Identifier: %c", symbol);
     Abort(tmp);
 }
 
@@ -71,11 +71,8 @@ bool InTable(char symbol)
 /* add a new symbol to table */
 void AddEntry(char symbol, char type)
 {
-    char tmp_buf[MAX_BUF];
     if (InTable(symbol)) {
-        tmp_buf[0] = symbol;
-        tmp_buf[1] = '\0';
-        Duplicate(tmp_buf);
+        Duplicate(symbol);
     }
     ST[symbol-'A'] = type;
 }
@@ -85,9 +82,7 @@ void CheckVar(char name)
 {
     char tmp_buf[MAX_BUF];
     if (!InTable(name)) {
-        tmp_buf[0] = name;
-        tmp_buf[1] = '\0';
-        Undefined(tmp_buf);
+        Undefined(name);
     }
     if (TypeOf(name) != 'v') {
         sprintf(tmp_buf, "%c is not a variable", name);
@@ -209,9 +204,9 @@ void EmitLn(char *str)
 }
 
 /* Post a label to output */
-void PostLabel(char *label)
+void PostLabel(char label)
 {
-    printf("%s:\n", label);
+    printf("%c:\n", label);
 }
 
 /* Load a variable to the primary register */
