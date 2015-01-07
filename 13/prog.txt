@@ -1,0 +1,7 @@
+va
+vb
+vc
+b
+a=b
+b=c
+e.
