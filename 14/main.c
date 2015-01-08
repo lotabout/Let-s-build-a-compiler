@@ -3,7 +3,7 @@
 
 #include "cradle.h"
 
-void Expression();
+char Expression();
 void Assignment();
 void DoBlock();
 void BeginBlock();
@@ -19,9 +19,9 @@ void Block();
 
 /* parse and tranlate an expression
  * vestigial version */
-void Expression()
+char Expression()
 {
-    Load(GetName());
+    return Load(GetName());
 }
 
 /* parse and tranlate an assignment statement */
@@ -29,8 +29,7 @@ void Assignment()
 {
     char name = GetName();
     Match('=');
-    Expression();
-    Store(name);
+    Store(name, Expression());
 }
 
 void Block()

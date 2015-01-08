@@ -285,15 +285,39 @@ void StoreVar(char name, char type)
 }
 
 /* load a variable to the primary register */
-void Load(char name)
+char Load(char name)
 {
-    LoadVar(name, VarType(name));
+    char type = VarType(name);
+    LoadVar(name, type);
+    return type;
 }
 
 /* store a variable from the primary register */
-void Store(char name)
+void Store(char name, char src_type)
 {
-    StoreVar(name, VarType(name));
+    char dst_type = VarType(name);
+    Convert(src_type, dst_type);
+    StoreVar(name, dst_type);
+}
+
+/* convert a data item from one type to another */
+void Convert(char src, char dst)
+{
+    /* this function only works when storing a variable and
+     * (B,W) -> (W,L)
+     * and the action are the same: zero extend %eax */
+    if (src != dst) {
+        switch(src) {
+            case 'B':
+                EmitLn("movzx %al, %eax");
+                break;
+            case 'W':
+                EmitLn("movzx %ax, %eax");
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 /* initialize the symbol table */

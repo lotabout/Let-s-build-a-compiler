@@ -98,9 +98,12 @@ char VarType(char name);
 void Move(char size, char *src, char *dest);
 
 /* load a variable to the primary register */
-void Load(char name);
+char Load(char name);
 /* store a variable from the primary register */
-void Store(char name);
+void Store(char name, char src_type);
+
+/* convert a data item from one type to another */
+void Convert(char src, char dst);
 
 
 #endif
