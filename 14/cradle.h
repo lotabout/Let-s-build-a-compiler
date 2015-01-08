@@ -117,9 +117,12 @@ void Clear();
 void Push(char type);
 char PopAdd(char src_type, char dst_type);
 char PopSub(char src_type, char dst_type);
-void PopMul();
-void PopDiv();
+char PopMul(char src_type, char dst_type);
+char PopDiv(char src_type, char dst_type);
 void GenAdd(char type);
 void GenSub(char type);
+void GenMul();
+void GenLongDiv();
+void GenLongMul();
 
 #endif

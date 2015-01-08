@@ -516,26 +516,63 @@ void GenSub(char type)
     }
 }
 
-/* multiply top of stack by primary */
-void PopMul()
+/* multiply top of stack by primary (Word) */
+void GenMul()
 {
-    EmitLn("imull (%esp), %eax");
-    EmitLn("addl $4, %esp");
+    EmitLn("imulw %dx, %ax");
+}
+
+/* multiply top of stack by primary (Long) */
+void GenLongMul()
+{
+    EmitLn("imull %edx, %eax");
+}
+
+void GenDiv()
+{
+    EmitLn("Dividision not implemented yet!");
+}
+
+void GenLongDiv()
+{
+    EmitLn("Dividision not implemented yet!");
+}
+
+/* multiply top of stack by primary */
+char PopMul(char src_type, char dst_type)
+{
+    Pop(src_type);
+    char type = SameType(src_type, dst_type);
+    Convert(type, 'W', 'd');
+    Convert(type, 'W', 'a');
+    if (type == 'L') {
+        GenLongMul(type);
+    } else {
+        GenMul();
+    }
+
+    if (type == 'B') {
+        type = 'W';
+    } else {
+        type = 'L';
+    }
+    return type;
 }
 
 /* divide top of stack by primary */
-void PopDiv()
+char PopDiv(char src_type, char dst_type)
 {
-    /* for a expersion like a/b we have eax=b and %(esp)=a
-     * but we need eax=a, and b on the stack
-     */
-    EmitLn("movl (%esp), %edx");
-    EmitLn("addl $4, %esp");
-    EmitLn("pushl %eax");
-    EmitLn("movl %edx, %eax");
-
-    /* sign extesnion */
-    EmitLn("sarl $31, %edx");
-    EmitLn("idivl (%esp)");
-    EmitLn("addl $4, %esp");
+    char type;
+    Pop(src_type);
+    Convert(src_type, 'L', 'd');
+    if (src_type == 'L' || dst_type == 'L') {
+        Convert(dst_type, 'L', 'a');
+        GenLongDiv();
+        type = 'L';
+    } else {
+        Convert(dst_type, 'w', 'a');
+        GenDiv();
+        type = src_type;
+    }
+    return type;
 }

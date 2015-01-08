@@ -6,6 +6,7 @@
 char Term();
 char Expression();
 void Assignment();
+char Factor();
 void DoBlock();
 void BeginBlock();
 void Alloc(char name, char type);
@@ -21,6 +22,8 @@ void Block();
 char Unop();
 char Add(char type);
 char Subtract(char type);
+char Multiply(char type);
+char Divide(char type);
 
 /* parse and tranlate an expression
  * vestigial version */
@@ -51,11 +54,37 @@ char Expression()
 
 char Term()
 {
-    if (IsAlpha(Look)) {
-        return Load(GetName());
-    } else {
-        return LoadNum(GetNum());
+    char type = Factor();
+    while(IsMulop(Look)) {
+        Push(type);
+        switch (Look) {
+            case '*':
+                type = Multiply(type);
+                break;
+            case '/':
+                type = Divide(type);
+                break;
+            default:
+                break;
+        }
     }
+    return type;
+}
+
+/* parse and translate a Factor */
+char Factor()
+{
+    char type;
+    if (Look == '(') {
+        Match('(');
+        type = Expression();
+        Match(')');
+    } else if (IsAlpha(Look)) {
+        type = Load(GetName());
+    } else {
+        type = LoadNum(GetNum());
+    }
+    return type;
 }
 
 /* process a term with leading unary operator */
@@ -76,6 +105,19 @@ char Subtract(char type)
     Match('-');
     return PopSub(type, Term());
 }
+
+char Multiply(char type)
+{
+    Match('*');
+    return PopMul(type, Factor());
+}
+
+char Divide(char type)
+{
+    Match('/');
+    return PopDiv(type, Factor());
+}
+
 
 /* parse and tranlate an assignment statement */
 void Assignment()
