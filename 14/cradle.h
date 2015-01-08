@@ -69,19 +69,24 @@ void Match(char c);
 char GetName(void);
 
 /* Get a number */
-char GetNum(void);
+int GetNum(void);
+
+/* load a constant to the primary register */
+char LoadNum(int val);
 
 /* output a string with TAB */
 void Emit(char *str);
 /* Output a string with TAB and CRLF */
 void EmitLn(char *str);
 
-
 /* Post a label to output */
 void PostLabel(char *label);
 
 /* Load a variable to the primary register */
 void LoadVar(char name, char type);
+
+/* Load a constant to the primary register */
+void LoadConst(int val, char type);
 
 /* store the primary register */
 void StoreVar(char name, char type);
@@ -103,7 +108,18 @@ char Load(char name);
 void Store(char name, char src_type);
 
 /* convert a data item from one type to another */
-void Convert(char src, char dst);
+void Convert(char src, char dst, char reg);
 
+/* promote the size of a register value */
+char Promote(char src_type, char dst_type, char reg);
+
+void Clear();
+void Push(char type);
+char PopAdd(char src_type, char dst_type);
+char PopSub(char src_type, char dst_type);
+void PopMul();
+void PopDiv();
+void GenAdd(char type);
+void GenSub(char type);
 
 #endif

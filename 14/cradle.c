@@ -200,15 +200,33 @@ char GetName(void)
 }
 
 /* Get a number */
-char GetNum(void)
+int GetNum(void)
 {
     if (!IsDigit(Look)) {
         Expected("Integer");
     }
-    char num = Look;
-    GetChar();
+    int val = 0;
+    while(IsDigit(Look)) {
+        val = 10*val + Look - '0';
+        GetChar();
+    }
     SkipWhite();
-    return num;
+    return val;
+}
+
+/* load a constant to the primary register */
+char LoadNum(int val)
+{
+    char type;
+    if (abs(val) <= 127) {
+        type = 'B';
+    } else if (abs(val) <= 32767) {
+        type = 'W';
+    } else {
+        type = 'L';
+    }
+    LoadConst(val, type);
+    return type;
 }
 
 /* output a string with TAB */
@@ -292,32 +310,79 @@ char Load(char name)
     return type;
 }
 
+/* Load a constant to the primary register */
+void LoadConst(int val, char type)
+{
+    char src[MAX_BUF];
+    sprintf(src, "$%d", val);
+    char *dst;
+    switch(type) {
+        case 'B':
+            dst = "%al";
+            break;
+        case 'W':
+            dst = "%ax";
+            break;
+        case 'L':
+            dst = "%eax";
+            break;
+        default:
+            dst = "%eax";
+            break;
+    }
+    Move(type, src, dst);
+}
+
+
 /* store a variable from the primary register */
 void Store(char name, char src_type)
 {
     char dst_type = VarType(name);
-    Convert(src_type, dst_type);
+    Convert(src_type, dst_type, 'a');
     StoreVar(name, dst_type);
 }
 
 /* convert a data item from one type to another */
-void Convert(char src, char dst)
+void Convert(char src, char dst, char reg)
 {
     /* this function only works when storing a variable and
      * (B,W) -> (W,L)
      * and the action are the same: zero extend %eax */
+    char tmp_buf[MAX_BUF];
     if (src != dst) {
         switch(src) {
             case 'B':
-                EmitLn("movzx %al, %eax");
+                sprintf(tmp_buf, "movzx %%%cl, %%e%cx", reg, reg);
+                EmitLn(tmp_buf);
                 break;
             case 'W':
-                EmitLn("movzx %ax, %eax");
+                sprintf(tmp_buf, "movzx %%%cx, %%e%cx", reg, reg);
+                EmitLn(tmp_buf);
                 break;
             default:
                 break;
         }
     }
+}
+
+/* promote the size of a register value */
+char Promote(char src_type, char dst_type, char reg)
+{
+    char type = src_type;
+    if (src_type != dst_type) {
+        if ((src_type == 'B') || ((src_type == 'W' && dst_type == 'L'))) {
+            Convert(src_type, dst_type, reg);
+            type = dst_type;
+        }
+    }
+    return type;
+}
+
+/* force both arguments to same type */
+char SameType(char src_type, char dst_type)
+{
+    src_type = Promote(src_type, dst_type, 'd');
+    return Promote(dst_type, src_type, 'a');
 }
 
 /* initialize the symbol table */
@@ -346,4 +411,131 @@ void Init()
     GetChar();
     SkipWhite();
     InitTable();
+}
+
+void Clear()
+{
+    EmitLn("xor %eax, %eax");
+}
+
+/* Push Primary onto stack */
+void Push(char type)
+{
+    switch(type) {
+        case 'B':
+        case 'W':
+            EmitLn("pushw %ax");
+            break;
+        case 'L':
+            EmitLn("pushl %eax");
+            break;
+        default:
+            break;
+    }
+}
+
+void Pop(char type)
+{
+    switch(type) {
+        case 'B':
+        case 'W':
+            EmitLn("popw %dx");
+            break;
+        case 'L':
+            EmitLn("popl %edx");
+            break;
+        default:
+            break;
+    }
+}
+
+/* Add Top of Stack to primary */
+char PopAdd(char src_type, char dst_type)
+{
+    Pop(src_type);
+    dst_type = SameType(src_type, dst_type);
+    GenAdd(dst_type);
+    return dst_type;
+
+    EmitLn("addl (%esp), %eax");
+    EmitLn("addl $4, %esp");
+}
+
+/* Subtract Primary from Top of Stack */
+char PopSub(char src_type, char dst_type)
+{
+    Pop(src_type);
+    dst_type = SameType(src_type, dst_type);
+    GenSub(dst_type);
+    return dst_type;
+
+    EmitLn("subl (%esp), %eax");
+    EmitLn("neg %eax");
+    EmitLn("addl $4, %esp");
+}
+
+/* add top of stack to primary */
+void GenAdd(char type)
+{
+    switch(type) {
+        case 'B':
+            EmitLn("addb %dl, %al");
+            break;
+        case 'W':
+            EmitLn("addw %dx, %ax");
+            break;
+        case 'L':
+            EmitLn("addl %edx, %eax");
+            break;
+        default:
+            EmitLn("addl %edx, %eax");
+            break;
+    }
+}
+
+/* subtract primary from top of stack to */
+void GenSub(char type)
+{
+    switch(type) {
+        case 'B':
+            EmitLn("subb %dl, %al");
+            EmitLn("neg %al");
+            break;
+        case 'W':
+            EmitLn("subw %dx, %ax");
+            EmitLn("neg %ax");
+            break;
+        case 'L':
+            EmitLn("subl %edx, %eax");
+            EmitLn("neg %eax");
+            break;
+        default:
+            EmitLn("subl %edx, %eax");
+            EmitLn("neg %eax");
+            break;
+    }
+}
+
+/* multiply top of stack by primary */
+void PopMul()
+{
+    EmitLn("imull (%esp), %eax");
+    EmitLn("addl $4, %esp");
+}
+
+/* divide top of stack by primary */
+void PopDiv()
+{
+    /* for a expersion like a/b we have eax=b and %(esp)=a
+     * but we need eax=a, and b on the stack
+     */
+    EmitLn("movl (%esp), %edx");
+    EmitLn("addl $4, %esp");
+    EmitLn("pushl %eax");
+    EmitLn("movl %edx, %eax");
+
+    /* sign extesnion */
+    EmitLn("sarl $31, %edx");
+    EmitLn("idivl (%esp)");
+    EmitLn("addl $4, %esp");
 }

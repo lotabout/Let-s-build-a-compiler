@@ -3,6 +3,7 @@
 
 #include "cradle.h"
 
+char Term();
 char Expression();
 void Assignment();
 void DoBlock();
@@ -17,11 +18,63 @@ void Epilog();
 
 void Block();
 
+char Unop();
+char Add(char type);
+char Subtract(char type);
+
 /* parse and tranlate an expression
  * vestigial version */
 char Expression()
 {
-    return Load(GetName());
+    char type;
+    if (IsAddop(Look)) {
+        type = Unop();
+    } else {
+        type = Term();
+    }
+
+    while(IsAddop(Look)) {
+        Push(type);
+        switch (Look) {
+            case '+':
+                type = Add(type);
+                break;
+            case '-':
+                type = Subtract(type);
+                break;
+            default:
+                break;
+        }
+    }
+    return type;
+}
+
+char Term()
+{
+    if (IsAlpha(Look)) {
+        return Load(GetName());
+    } else {
+        return LoadNum(GetNum());
+    }
+}
+
+/* process a term with leading unary operator */
+char Unop()
+{
+    Clear();
+    return 'W';
+}
+
+char Add(char type)
+{
+    Match('+');
+    return PopAdd(type, Term());
+}
+
+char Subtract(char type)
+{
+    Match('-');
+    return PopSub(type, Term());
 }
 
 /* parse and tranlate an assignment statement */
