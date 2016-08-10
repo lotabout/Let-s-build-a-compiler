@@ -13,7 +13,7 @@ char tmp[MAX_BUF];
 
 
 /* Keywords symbol table */
-const char const *KWList[] = {
+const char * const KWList[] = {
     "IF",
     "ELSE",
     "ENDIF",
@@ -29,7 +29,7 @@ char Value[MAX_BUF];     /* string token of Look */
  * If the input string matches a table entry, return the entry index, else
  * return -1.
  * *n* is the size of the table */
-int Lookup(const char const *table[], const char *string, int n)
+int Lookup(const char  * const table[], const char *string, int n)
 {
     int i;
     bool found = false;
