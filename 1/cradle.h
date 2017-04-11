@@ -1,7 +1,7 @@
 #ifndef _CRADLE_H
 #define _CRADLE_H
 
-#define UPCASE(C) ((1<<6)| (C))
+#define UPCASE(C) (~(1<<5) & (C))
 #define MAX_BUF 100
 
 static char tmp[MAX_BUF];
