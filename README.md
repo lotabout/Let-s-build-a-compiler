@@ -49,7 +49,7 @@ movl $1, %eax  # exit function
 int $0x80
 ```
 
-    -Note from random github user-
+-Note from random github user-
 On older operating systems IO was performed by an interrupt to an area of
 memory that contains instructions for performing the operation with your
 particular hardware configuration. This left the developers of the operating
@@ -66,7 +66,8 @@ For anyone on Windows I would recommend getting a used copy of Charles
 Petzold's Programming Windows Fifth Edition and checking out
 http://www.godevtool.com for some free tools and tutorials for accessing
 Windows API from assembly.
-    -End of note-
+
+-End of note-
 
 ## The Article
 The article mainly talks about how to design compiler top-down. It covered a
