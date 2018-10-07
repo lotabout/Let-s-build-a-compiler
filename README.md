@@ -50,6 +50,7 @@ int $0x80
 ```
 
 -Note from random github user-
+
 On older operating systems IO was performed by an interrupt to an area of
 memory that contains instructions for performing the operation with your
 particular hardware configuration. This left the developers of the operating
