@@ -49,6 +49,27 @@ movl $1, %eax  # exit function
 int $0x80
 ```
 
+-Note from random github user-
+
+On older operating systems IO was performed by an interrupt to an area of
+memory that contains instructions for performing the operation with your
+particular hardware configuration. This left the developers of the operating
+systems unable to change the memory layout without forcing all the software
+written to be modified as well.
+
+The POSIX standard on UNIX-like operating systems as well as Windows and
+Macintosh operating systems, started including libraries for C or Pascal
+with functions for system calls. This means you will either have to compile
+for DOS or learn some specialized things about your operating system and
+the format of C libraries.
+
+For anyone on Windows I would recommend getting a used copy of Charles
+Petzold's Programming Windows Fifth Edition and checking out
+http://www.godevtool.com for some free tools and tutorials for accessing
+Windows API from assembly.
+
+-End of note-
+
 ## The Article
 The article mainly talks about how to design compiler top-down. It covered a
 lot of aspects in compiler design like lexical scanning, BNF, symbols,
